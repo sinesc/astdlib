@@ -1,0 +1,84 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (C) 2013 Dennis Möhlmann <mail@dennismoehlmann.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+var merge = require('./merge');
+
+export extend = function() {
+    merge(ArrayExtensions, Array);
+    merge(ArrayExtensions.prototype, Array.prototype);
+};
+
+module ArrayExtensions = proto {
+
+    /**
+     * Array.first
+     *
+     * returns the first array element id or null
+     */
+    first: property {
+        get: function() {
+            for (var i in this) {
+                return parseInt(i);
+            }
+            return null;
+        }
+    },
+
+    /**
+     * Array.insert
+     *
+     * inserts a value at the end of the array and returns its index
+     */
+    insert: property {
+        value: function(value) {
+            return this.push(value) -1;
+        }
+    },
+
+    /**
+     * Array.remove
+     *
+     * removes an element from the array, shifts the last element into
+     * the position of the removed element and reduces array length by one
+     *
+     * use the following pattern when iterating over an array while removing
+     * elements at the same time:
+     *
+     * var id = array.length;
+     *
+     * while (id--) {
+     *     if (array[id] matches condition) {
+     *         array.remove(id);
+     *         break if matching only one item
+     *     }
+     * }
+     */
+    remove: property {
+        value: function(id) {
+            assert(typeof id === 'number');
+            assert(id < this.length);
+
+            this[id] = this[this.length -1];
+            return --this.length;
+        }
+    },
+};

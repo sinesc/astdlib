@@ -1,0 +1,68 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (C) 2013 Dennis Möhlmann <mail@dennismoehlmann.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+var merge = require('./merge');
+
+export extend = function() {
+    merge(FunctionExtensions, Function);
+    merge(FunctionExtensions.prototype, Function.prototype);
+};
+
+module FunctionExtensions = proto {
+
+    /**
+     * invoke a constructor with variable arguments
+     */
+    construct: function(argsArray) {
+
+        // first parameter is ignored, push arguments behind it
+
+        var args = [ null ];
+        Array.prototype.push.apply(args, argsArray);
+
+        // call bind on this function using arguments null, argsArray[0]... to get constructor with args, then new it
+
+        return new (Function.prototype.bind.apply(this, args));
+    },
+
+    /**
+     * copies properties from given constructor's prototype to this constructors prototype, skipping properties
+     * that already exists immediately in the constructors prototype
+     *
+     * @param constructor constructor whose prototype is to be copied
+     */
+    mixin: function(constructor) {
+
+        var thisProto = this.prototype;
+        var otherProto = constructor.prototype;
+        var props = Object.getOwnPropertyNames(otherProto);
+        var propName;
+
+        for (var id in props) {
+            propName = props[id];
+            if (thisProto.hasOwnProperty(propName) === false) {
+                Object.defineProperty(thisProto, propName, Object.getOwnPropertyDescriptor(otherProto, propName));
+            }
+        }
+    },
+
+};

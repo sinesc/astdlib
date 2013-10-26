@@ -1,0 +1,317 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (C) 2013 Dennis Möhlmann <mail@dennismoehlmann.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+var merge = require('./merge');
+
+export extend = function() {
+    merge(StringExtensions, String);
+    merge(StringExtensions.prototype, String.prototype);
+};
+
+module StringExtensions = proto {
+
+    /**
+     * convert snake-cast to camel-case, i.e. test_function to testFunction or TestFunction
+     *
+     * @param upperFirst if true, uppercase first letter as well
+     * @return string
+     */
+    snakeToCamel: (function() {
+
+        var firstToUpper = function(match1) {
+            return match1.replace('_', '').toUpperCase();
+        };
+
+        return function snakeToCamel(upperFirst) {
+
+            if (upperFirst) {
+                return this.replace(/((?:^|\_)[a-z])/g, firstToUpper);
+            } else {
+                return this.replace(/(\_[a-z])/g, firstToUpper);
+            }
+        };
+
+    })(),
+
+    /**
+     * returns whether this string has given prefix
+     *
+     * @param prefix
+     * @return bool
+     */
+    hasPrefix: function(prefix) {
+
+        return (this.substr(0, prefix.length) === prefix);
+    },
+
+    /**
+     * removes given prefix or one of an array of prefixes from a string and
+     * returns the new string
+     *
+     * @param prefix string or array of strings
+     * @return strippedString
+     */
+    stripPrefix: function(prefix) {
+
+        var len;
+
+        if (prefix instanceof Array) {
+
+            for (var i in prefix) {
+
+                len = prefix[i].length;
+
+                if (this.substr(0, len) === prefix[i]) {
+                    return this.substr(len);
+                }
+            }
+
+            return this.valueOf();
+        }
+
+        len = prefix.length;
+        return (this.substr(0, len) === prefix ? this.substr(len) : this.valueOf());
+    },
+
+    /**
+     * returns whether this string has given postfix
+     *
+     * @param postfix
+     * @return bool
+     */
+    hasPostfix: function(postfix) {
+
+        return (this.substr(-postfix.length) === postfix);
+    },
+
+    /**
+     * removes given postfix or one of an array of postfixes from a string and
+     * returns the new string
+     *
+     * @param postfix string or array of strings
+     * @return strippedString
+     */
+    stripPostfix: function(postfix) {
+
+        var len;
+
+        if (postfix instanceof Array) {
+
+            for (var i in postfix) {
+
+                len = postfix[i].length;
+
+                if (this.substr(-len) === postfix[i]) {
+                    return this.substr(0, this.length - len);
+                }
+            }
+
+            return this.valueOf();
+        }
+
+        len = postfix.length;
+        return (this.substr(-len) === postfix ? this.substr(0, this.length - len) : this.valueOf());
+    },
+
+    /**
+     * string format
+     * !TODO
+     */
+    format: function() {
+
+        var args = Array::slice.call(arguments);
+
+        // if first argument is array or object, use only that
+
+        if (args.length === 1 && args[0] instanceof Object) {
+            args = args[0];
+        }
+
+        return this.replace(/(.?)\$([0-9a-z]+)(\:([0-9a-z\:\-]+\.?))?/ig, function(str, prefix, matchname, optmatch, options) {
+
+            // double $$ means to output a $ instead of a formatstring
+
+            if (prefix === '$') {
+                return '$' + matchname + (optmatch !== undefined ? optmatch : '');
+            }
+
+            var formatted = args[matchname];
+
+            if (options.slice(-1) === '.') {
+                options = options.slice(0, -1);
+            }
+
+            if (options === 'currency') {
+                formatted = Math.floor(formatted * 100) / 100;
+            }
+
+            if (options.substr(0, 4) === 'pad:') {
+                formatted = String::padLeft.call(''+formatted, options.substr(4), ' ');
+            }
+
+            return (args[matchname] !== undefined ? prefix + formatted : str);
+        });
+    },
+
+    /**
+     * repeats this string count times and returns the result
+     *
+     * @param count
+     * @return repeatedString
+     */
+    repeat: function(count) {
+
+        if (count < 1) {
+            return '';
+        }
+
+        var result = '';
+        var pattern = this.valueOf();
+
+        while (count > 1) {
+
+            if (count & 1) {
+                result += pattern;
+            }
+
+            count >>= 1;
+            pattern += pattern;
+        }
+
+        // unrolled from count > 0
+
+        result += pattern;
+
+        return result;
+    },
+
+    /**
+     * returns number of occurances of a given search string in this string
+     *
+     * @param search
+     * @return count
+     */
+    occurances: function(search) {
+
+        var count = 0;
+        var index = this.indexOf(search);
+
+        while (index !== -1) {
+            count++;
+            index = this.indexOf(search, index + 1);
+        }
+
+        return count;
+    },
+
+    /**
+     * starting from the left, pads the string to paddedLength using given padChar
+     *
+     * @param paddedLength
+     * @param padChar
+     * @return paddedString
+     */
+    padLeft: function(paddedLength, padChar = ' ') {
+
+        return padChar.repeat(paddedLength - this.length) + this.valueOf();
+    },
+
+    /**
+     * starting from the right, pads the string to paddedLength using given padChar
+     *
+     * @param paddedLength
+     * @param padChar
+     * @return paddedString
+     */
+    padRight: function(paddedLength, padChar = ' ') {
+
+        return this.valueOf() + padChar.repeat(paddedLength - this.length);
+    },
+
+    /**
+     * escapes string for use in javascript source code
+     *
+     * @param mode either " or ', if neither, string will be escaped for both cases
+     * @return escapedString
+     */
+    jsify: function(mode) {
+
+        if (mode === "'") {
+            return this.replace(/([\\'])/g, "\\$1").replace(/\r?\n/g, '\\n\\\n').replace(/\0/g, "\\0");
+        } else if (mode === '"') {
+            return this.replace(/([\\"])/g, "\\$1").replace(/\r?\n/g, '\\n\\\n').replace(/\0/g, "\\0");
+        } else {
+            return this.replace(/([\\"'])/g, "\\$1").replace(/\r?\n/g, '\\n\\\n').replace(/\0/g, "\\0");
+        }
+    },
+
+    /**
+     * capitalizes the first letter of this string and returns the new string
+     *
+     * @return capitalizedString
+     */
+    capitalize: function() {
+        return this.charAt(0).toUpperCase() + this.slice(1);
+    },
+
+    /**
+     * decapitalize the first letter of this string and returns the new string
+     *
+     * @return decapitalizedString
+     */
+    decapitalize: function() {
+        return this.charAt(0).toLowerCase() + this.slice(1);
+    },
+
+};
+
+/**
+ * returns a random string of given length composed of given chars
+ *
+ * @param length
+ * @param chars
+ * @return randomString
+ */
+export random = function(length = 16, chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') {
+
+    var numChars    = chars.length;
+    var result      = '';
+
+    for (var i = 0; i < length; i++) {
+        var rnum = Math.floor(Math.random() * numChars);
+        result += chars.substr(rnum, 1);
+    }
+
+    return result;
+};
+
+/**
+ * repeats the given string count times and returns the result
+ *
+ * @param count
+ * @param string
+ * @return repeatedString
+ */
+export repeat = function(count, string = ' ') {
+
+    return StringExtensions::repeat.call(string, count);
+};

@@ -1,0 +1,83 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (C) 2013 Dennis Möhlmann <mail@dennismoehlmann.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the 'Software'), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+var merge = require('./merge');
+
+export extend = function() {
+    merge(DateExtensions, Date);
+    merge(DateExtensions.prototype, Date.prototype);
+};
+
+var dateLocale = {
+    enGB: {
+        months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        monthsLong: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        daysLong: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    },
+    deDE: {
+        months: ['Jan', 'Feb', 'Mrz', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+        days: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+        monthsLong: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+        daysLong: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
+    },
+};
+
+var zeroPad = function(number) {
+    return ('0' + number).substr(-2,2);
+};
+
+var dateMarkers = {
+    d: [ 'getDate', function(v) { return zeroPad(v); } ],
+    m: [ 'getMonth', function(v) { return zeroPad(v+1); } ],
+    n: [ 'getMonth', function(v, locale) { return locale.months[v]; } ],
+    w: [ 'getDay', function(v, locale) { return locale.days[v]; } ],
+    y: [ 'getFullYear' ],
+    H: [ 'getHours', function(v) { return zeroPad(v); } ],
+    M: [ 'getMinutes', function(v) { return zeroPad(v); } ],
+    S: [ 'getSeconds', function(v) { return zeroPad(v); } ],
+    i: [ 'toISOString' ]
+};
+
+module DateExtensions = proto {
+
+    format: function(formatString, localeName = 'enGB') {
+
+        var self = this;
+        var locale = dateLocale[localeName];
+
+        return formatString.replace(/%(.)/g, function(m, p) {
+
+            // call first datemarker function for this part
+
+            var part = self[dateMarkers[p][0]]();
+
+            // check if part requires postprocessing by second datemarker function
+
+            if (typeof dateMarkers[p][1] === 'function') {
+                part = dateMarkers[p][1](part, locale);
+            }
+
+            return part;
+        });
+    },
+};

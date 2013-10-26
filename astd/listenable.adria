@@ -1,0 +1,253 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (C) 2013 Dennis Möhlmann <mail@dennismoehlmann.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+var util = require('./util');
+var InvalidArgumentException = require('./exceptions').InvalidArgumentException;
+
+module Listenable = proto {
+
+    _listener: property {
+        value: null,
+        writable: true,
+    },
+
+    /**
+     * subscribe to all events by given listenable, attaching this listenable's
+     * on<Event> methods to listenable's <event>'s
+     *
+     * @param listenable
+     */
+    subscribe: function(listenable) {
+
+        assert(listenable instanceof Listenable);
+
+        initListener.call(listenable, '_');
+        var listener = new Listener([ ], this, null);
+        listenable._listener['_'].push(listener);
+        return listener;
+    },
+
+    /**
+     * unsubscribe from given listener
+     *
+     * @param listenable
+     */
+    unsubscribe: function(listenable) {
+
+        offCallback(listenable._listener['_'], this, null);
+    },
+
+    /**
+     * triggers given event and notifies listeners (synchronous)
+     *
+     * @param eventName event to trigger
+     * @param ... optional parameters passed to listeners
+     */
+    execute: function(eventName) {
+
+        if (this._listener === null || (this._listener[eventName] === undefined && this._listener['_'] === undefined)) {
+            return;
+        }
+
+        // handle listeners
+
+        var args = Array::slice.call(arguments, 1);
+        var eventListener = this._listener[eventName];
+
+        for (var id, listener in eventListener) {
+            listener.callback.apply(listener.context, listener.params.concat(args));
+        }
+
+        // handle subscribers
+
+        eventListener = this._listener['_'];
+
+        if (eventListener !== undefined) {
+
+            var methodName = 'on' + eventName.charAt(0).toUpperCase() + eventName.slice(1);
+            var method;
+
+            for (var id, listener in eventListener) {
+
+                method = listener.context[methodName];
+
+                if (typeof method === 'function') {
+                    method.apply(listener.context, args);
+                }
+            }
+        }
+    },
+
+    /**
+     * triggers given event and notifies listeners (async)
+     *
+     * @see execute
+     */
+    trigger: function(eventName) {
+        util.defer(this, arguments, this.execute);
+    },
+
+    /**
+     * subscribe to given event
+     *
+     * @param eventName
+     * @param params optional parameters to pass as first arguments to listener
+     * @param context optional context to run listener in
+     * @param callback called when the event is triggered
+     */
+    on: function(eventName, params, context, callback) {
+
+        // handle array of events
+    
+        if (eventName instanceof Array) {
+            var args = Array::slice.call(arguments);
+            for (var id, name in eventName) {
+                args[0] = name;
+                this.on.apply(this, args);
+            }
+        }
+        
+        assert(typeof eventName === 'string');
+        assert(callback === undefined || arguments.length === 4);
+
+        if (context === undefined) {
+            assert(arguments.length === 2);
+            callback = params;
+            context = this;
+            params = [];
+        } else if (callback === undefined) {
+            assert(arguments.length === 3);
+            callback = context;
+            context = params;
+            params = [];
+        }
+
+        assert(context === null || context instanceof Object);
+        assert(typeof callback === 'function');
+
+        // attach listener
+
+        initListener.call(this, eventName);
+        this._listener[eventName].push(new Listener(params, context, callback));
+    },
+
+    off: function(eventName, context, callback) {
+
+        // handle array of events
+    
+        if (eventName instanceof Array) {
+            var args = Array::slice.call(arguments);
+            for (var id, name in eventName) {
+                args[0] = name;
+                this.off.apply(this, args);
+            }
+        }
+    
+        // check if anything is registered at all
+
+        assert(typeof eventName === 'string');
+
+        if (this._listener === null || this._listener[eventName] === undefined) {
+            return false;
+        }
+
+        if (callback === undefined) {
+
+            if (context instanceof Listener) {
+                return offListener(this._listener[eventName], context);
+            } else if (typeof context === 'function') {
+                return offCallback(this._listener[eventName], this, context);
+            } else if (context === undefined) {
+                delete this._listener[eventName];
+                return true;
+            } else  {
+                throw new InvalidArgumentException('expected Listener or Function as argument 2');
+            }
+
+        } else {
+
+            return offCallback(this._listener[eventName], context, callback);
+        }
+    },
+};
+
+var initListener = function(eventName) {
+
+    if (this._listener === null) {
+        this._listener = { };
+    }
+
+    if (this._listener[eventName] === undefined) {
+        this._listener[eventName] = [ ];
+    }
+};
+
+var offListener = function(eventListener, listener) {
+
+    assert(listener instanceof Listener);
+
+    var id = eventListener.length;
+
+    while (id--) {
+        if (eventListener[id] === listener) {
+            eventListener.remove[id];
+            return true;
+        }
+    }
+
+    return false;
+};
+
+var offCallback = function(eventListener, context, callback) {
+
+    assert(context instanceof Object);
+    assert(typeof callback === 'function' || callback === null);
+
+    var id = eventListener.length;
+
+    while (id--) {
+        if (eventListener[id].context === context && eventListener[id].callback === callback) {
+            eventListener.remove[id];
+            return true;
+        }
+    }
+
+    return false;
+};
+
+export Listener = proto {
+
+    params      : null,
+    context     : null,
+    callback    : null,
+
+    constructor: function(params, context, callback) {
+
+        assert(params instanceof Array);
+        assert(context instanceof Object);
+        assert(typeof callback === 'function' || callback === null);
+
+        this.params = params;
+        this.context = context;
+        this.callback = callback;
+    },
+};
