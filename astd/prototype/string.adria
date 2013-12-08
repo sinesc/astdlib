@@ -233,7 +233,7 @@ module StringExtensions = proto {
      */
     padLeft: function(paddedLength, padChar = ' ') {
 
-        return padChar.repeat(paddedLength - this.length) + this.valueOf();
+        return padChar.repeat(Math.max(0, paddedLength - this.length)) + this.valueOf();
     },
 
     /**
@@ -245,7 +245,7 @@ module StringExtensions = proto {
      */
     padRight: function(paddedLength, padChar = ' ') {
 
-        return this.valueOf() + padChar.repeat(paddedLength - this.length);
+        return this.valueOf() + padChar.repeat(Math.max(0, paddedLength - this.length));
     },
 
     /**

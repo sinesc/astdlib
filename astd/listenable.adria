@@ -23,6 +23,7 @@
  */
 var util = require('./util');
 var InvalidArgumentException = require('./exceptions').InvalidArgumentException;
+var ArrayExtensions = require('./prototype/array');
 
 module Listenable = proto {
 
@@ -42,7 +43,7 @@ module Listenable = proto {
         assert(listenable instanceof Listenable);
 
         initListener.call(listenable, '_');
-        var listener = new Listener([ ], this, null);
+        var listener = new Listener([ ], this, null, false);
         listenable._listener['_'].push(listener);
         return listener;
     },
@@ -74,8 +75,18 @@ module Listenable = proto {
         var args = Array::slice.call(arguments, 1);
         var eventListener = this._listener[eventName];
 
-        for (var id, listener in eventListener) {
-            listener.callback.apply(listener.context, listener.params.concat(args));
+        if (eventListener !== undefined) {
+
+            var id = eventListener.length;
+
+            while (id--) {
+                var listener = eventListener[id];
+                listener.callback.apply(listener.context, listener.params.concat(args));
+
+                if (listener.once) {
+                    this.off(eventName, listener.context, listener.callback);
+                }
+            }
         }
 
         // handle subscribers
@@ -115,46 +126,69 @@ module Listenable = proto {
      * @param context optional context to run listener in
      * @param callback called when the event is triggered
      */
-    on: function(eventName, params, context, callback) {
+    on: function(eventName, params, context, callback, once) {
 
         // handle array of events
-    
+
         if (eventName instanceof Array) {
             var args = Array::slice.call(arguments);
             for (var id, name in eventName) {
                 args[0] = name;
                 this.on.apply(this, args);
             }
+            return;
         }
-        
+
         assert(typeof eventName === 'string');
-        assert(callback === undefined || arguments.length === 4);
+        assert(once === undefined || arguments.length === 5);
 
         if (context === undefined) {
-            assert(arguments.length === 2);
+            assert(arguments.length === 2 || once === true);
             callback = params;
             context = this;
             params = [];
+            once = (once === undefined ? false : once);
         } else if (callback === undefined) {
-            assert(arguments.length === 3);
+            assert(arguments.length === 3 || once === true);
             callback = context;
             context = params;
             params = [];
+            once = (once === undefined ? false : once);
+        } else if (once === undefined) {
+            assert(arguments.length === 4);
+            once = false;
         }
 
+        assert(params instanceof Array);
         assert(context === null || context instanceof Object);
         assert(typeof callback === 'function');
 
         // attach listener
 
         initListener.call(this, eventName);
-        this._listener[eventName].push(new Listener(params, context, callback));
+        this._listener[eventName].push(new Listener(params, context, callback, once));
     },
 
+    /**
+     * subscribe to given event and unsubscribe once triggered
+     *
+     * @see Listenable::on()
+     */
+    once: function(eventName, params, context, callback) {
+        this.on(eventName, params, context, callback, true);
+    },
+
+    /**
+     * unsubscribe from given event, @see Listenable::on() for parameter descriptions
+     *
+     * @param eventName
+     * @param context
+     * @param callback
+     */
     off: function(eventName, context, callback) {
 
         // handle array of events
-    
+
         if (eventName instanceof Array) {
             var args = Array::slice.call(arguments);
             for (var id, name in eventName) {
@@ -162,7 +196,7 @@ module Listenable = proto {
                 this.off.apply(this, args);
             }
         }
-    
+
         // check if anything is registered at all
 
         assert(typeof eventName === 'string');
@@ -210,7 +244,7 @@ var offListener = function(eventListener, listener) {
 
     while (id--) {
         if (eventListener[id] === listener) {
-            eventListener.remove[id];
+            ArrayExtensions::remove.call(eventListener, id);
             return true;
         }
     }
@@ -227,7 +261,7 @@ var offCallback = function(eventListener, context, callback) {
 
     while (id--) {
         if (eventListener[id].context === context && eventListener[id].callback === callback) {
-            eventListener.remove[id];
+            ArrayExtensions::remove.call(eventListener, id);
             return true;
         }
     }
@@ -240,15 +274,18 @@ export Listener = proto {
     params      : null,
     context     : null,
     callback    : null,
+    once        : false,
 
-    constructor: function(params, context, callback) {
+    constructor: function(params, context, callback, once) {
 
         assert(params instanceof Array);
         assert(context instanceof Object);
         assert(typeof callback === 'function' || callback === null);
+        assert(once === true || once === false);
 
         this.params = params;
         this.context = context;
         this.callback = callback;
+        this.once = once;
     },
 };
