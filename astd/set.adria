@@ -1,7 +1,7 @@
 /*
  * Adria Standard Library
  *
- * Copyright (C) 2013 Dennis Möhlmann <mail@dennismoehlmann.de>
+ * Copyright (C) 2014 Dennis Möhlmann <mail@dennismoehlmann.de>
  * Licensed under the MIT license.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -29,7 +29,7 @@ module Set = proto {
 
     constructor: function(value) {
 
-        this.data = { };
+        this.data = Object.create(null);
 
         if (value !== undefined) {
             this.add(value);
@@ -131,7 +131,7 @@ module Set = proto {
         if (value instanceof Array) {
 
             for (var id in value) {
-                if (data.hasOwnProperty(value[id]) !== true) {
+                if (value[id] in data !== true) {
                     return false;
                 }
             }
@@ -143,7 +143,7 @@ module Set = proto {
             var other = value.data;
 
             for (var key in other) {
-                if (data.hasOwnProperty(key) !== true) {
+                if (key in data !== true) {
                     return false;
                 }
             }
@@ -152,10 +152,16 @@ module Set = proto {
 
         } else {
 
-            return (data.hasOwnProperty(value));
+            return (value in data);
         }
     },
 
+    /**
+     * check if set lacks single value, all values of array or set
+     *
+     * @param value
+     * @return boolean
+     */
     lacks: function(value) {
         return this.has(value) === false;
     },
