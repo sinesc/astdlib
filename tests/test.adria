@@ -44,14 +44,14 @@ if (thrown.stack.split(':', 1)[0] !== 'AssertionFailedException') {
 
 // set up module
 
-module test = function(name, func) {
+module test = func(name, fn) {
 
     var success = true;
 
     log('test ' + testId++ + ': ' + name + ' ', false);
 
     try {
-        func();
+        fn();
     } catch (e) {
         success = false;
         exceptions.push(e);
@@ -65,7 +65,7 @@ module test = function(name, func) {
     }
 };
 
-export log = function(message, nl = true) {
+export log = func(message, nl = true) {
 
     var now         = Date.now();
     var diffStart   = now - start;
@@ -76,12 +76,12 @@ export log = function(message, nl = true) {
     process.stdout.write(('+' + diffLast + '/' + diffStart) + 'ms: ' + message + (nl ? '\n' : ''));
 };
 
-export print = function(message, nl = true) {
+export print = func(message, nl = true) {
 
     process.stdout.write(message + (nl ? '\n' : ''));
 };
 
-export summary = function() {
+export summary = func() {
 
     log((oks + fails) + ' tests done, ' + oks + ' ok, ' + fails + (fails > 0 ? ' FAILURES' : ' failures'));
 
@@ -90,12 +90,12 @@ export summary = function() {
     }
 };
 
-export fail = function(message) {
+export fail = func(message) {
 
     throw new Error(message);
 };
 
-export reset = function() {
+export reset = func() {
 
     testId      = 1;
     start       = Date.now();

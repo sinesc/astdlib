@@ -33,12 +33,12 @@ var TestObj = proto (Listenable) { };
  * tests
  */
 
-test('on', function() {
+test('on', func() {
 
     var testObj = new TestObj();
     var triggered = false;
 
-    testObj.on('testevent', function(event) {
+    testObj.on('testevent', func(event) {
         triggered = true;
     });
 
@@ -47,12 +47,12 @@ test('on', function() {
     assert(triggered === true);
 });
 
-test('once', function() {
+test('once', func() {
 
     var testObj = new TestObj();
     var triggered = 0;
 
-    testObj.once('testevent', function(event) {
+    testObj.once('testevent', func(event) {
         triggered++;
     });
 

@@ -21,26 +21,26 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-export defer = (function() {
+export defer = (func() {
 
     var asap;
     import process;
 
     if (typeof process === 'object' && typeof process.nextTick === 'function') {
-        asap = function(context, params, callback) {
-            process.nextTick(function() {
+        asap = func(context, params, callback) {
+            process.nextTick(func() {
                 callback.apply(context, params);
             });
         };
     } else {
-        asap = function(context, params, callback) {
-            setTimeout(function() {
+        asap = func(context, params, callback) {
+            setTimeout(func() {
                 callback.apply(context, params);
             }, 0);
         };
     }
 
-    return function(context, params, callback) {
+    return func(context, params, callback) {
 
         if (params === undefined) {
             callback = context;

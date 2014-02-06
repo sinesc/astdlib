@@ -23,7 +23,7 @@
  */
 var merge = require('./merge');
 
-export extend = function() {
+export extend = func() {
     merge(StringExtensions, String);
     merge(StringExtensions.prototype, String.prototype);
 };
@@ -36,13 +36,13 @@ module StringExtensions = proto {
      * @param upperFirst if true, uppercase first letter as well
      * @return string
      */
-    snakeToCamel: (function() {
+    snakeToCamel: (func() {
 
-        var firstToUpper = function(match1) {
+        var firstToUpper = func(match1) {
             return match1.replace('_', '').toUpperCase();
         };
 
-        return function snakeToCamel(upperFirst) {
+        return func snakeToCamel(upperFirst) {
 
             if (upperFirst) {
                 return this.replace(/((?:^|\_)[a-z])/g, firstToUpper);
@@ -59,7 +59,7 @@ module StringExtensions = proto {
      * @param prefix
      * @return bool
      */
-    hasPrefix: function(prefix) {
+    hasPrefix: func(prefix) {
 
         return (this.substr(0, prefix.length) === prefix);
     },
@@ -71,7 +71,7 @@ module StringExtensions = proto {
      * @param prefix string or array of strings
      * @return strippedString
      */
-    stripPrefix: function(prefix) {
+    stripPrefix: func(prefix) {
 
         var len;
 
@@ -99,7 +99,7 @@ module StringExtensions = proto {
      * @param postfix
      * @return bool
      */
-    hasPostfix: function(postfix) {
+    hasPostfix: func(postfix) {
 
         return (this.substr(-postfix.length) === postfix);
     },
@@ -111,7 +111,7 @@ module StringExtensions = proto {
      * @param postfix string or array of strings
      * @return strippedString
      */
-    stripPostfix: function(postfix) {
+    stripPostfix: func(postfix) {
 
         var len;
 
@@ -137,7 +137,7 @@ module StringExtensions = proto {
      * string format
      * !TODO
      */
-    format: function() {
+    format: func() {
 
         var args = Array::slice.call(arguments);
 
@@ -147,7 +147,7 @@ module StringExtensions = proto {
             args = args[0];
         }
 
-        return this.replace(/(.?)\$([0-9a-z]+)(\:([0-9a-z\:\-]+\.?))?/ig, function(str, prefix, matchname, optmatch, options) {
+        return this.replace(/(.?)\$([0-9a-z]+)(\:([0-9a-z\:\-]+\.?))?/ig, func(str, prefix, matchname, optmatch, options) {
 
             // double $$ means to output a $ instead of a formatstring
 
@@ -179,7 +179,7 @@ module StringExtensions = proto {
      * @param count
      * @return repeatedString
      */
-    repeat: function(count) {
+    repeat: func(count) {
 
         if (count < 1) {
             return '';
@@ -211,7 +211,7 @@ module StringExtensions = proto {
      * @param search
      * @return count
      */
-    occurances: function(search) {
+    occurances: func(search) {
 
         var count = 0;
         var index = this.indexOf(search);
@@ -231,7 +231,7 @@ module StringExtensions = proto {
      * @param padChar
      * @return paddedString
      */
-    padLeft: function(paddedLength, padChar = ' ') {
+    padLeft: func(paddedLength, padChar = ' ') {
 
         return padChar.repeat(Math.max(0, paddedLength - this.length)) + this.valueOf();
     },
@@ -243,7 +243,7 @@ module StringExtensions = proto {
      * @param padChar
      * @return paddedString
      */
-    padRight: function(paddedLength, padChar = ' ') {
+    padRight: func(paddedLength, padChar = ' ') {
 
         return this.valueOf() + padChar.repeat(Math.max(0, paddedLength - this.length));
     },
@@ -254,7 +254,7 @@ module StringExtensions = proto {
      * @param mode either " or ', if neither, string will be escaped for both cases
      * @return escapedString
      */
-    jsify: function(mode) {
+    jsify: func(mode) {
 
         if (mode === "'") {
             return this.replace(/([\\'])/g, "\\$1").replace(/\r?\n/g, '\\n\\\n').replace(/\0/g, "\\0");
@@ -270,7 +270,7 @@ module StringExtensions = proto {
      *
      * @return capitalizedString
      */
-    capitalize: function() {
+    capitalize: func() {
         return this.charAt(0).toUpperCase() + this.slice(1);
     },
 
@@ -279,7 +279,7 @@ module StringExtensions = proto {
      *
      * @return decapitalizedString
      */
-    decapitalize: function() {
+    decapitalize: func() {
         return this.charAt(0).toLowerCase() + this.slice(1);
     },
 
@@ -292,7 +292,7 @@ module StringExtensions = proto {
  * @param chars
  * @return randomString
  */
-export random = function(length = 16, chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') {
+export random = func(length = 16, chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') {
 
     var numChars    = chars.length;
     var result      = '';
@@ -312,7 +312,7 @@ export random = function(length = 16, chars = '0123456789abcdefghijklmnopqrstuvw
  * @param string
  * @return repeatedString
  */
-export repeat = function(count, string = ' ') {
+export repeat = func(count, string = ' ') {
 
     return StringExtensions::repeat.call(string, count);
 };

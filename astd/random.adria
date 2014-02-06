@@ -32,12 +32,12 @@ module Random = proto {
      * set or get the original seed
      * @param value any finite numeric
      */
-    seed: property {
+    seed: prop {
         default: 1,
-        get: function() {
+        get: func() {
             return storage;
         },
-        set: function(value) {
+        set: func(value) {
             assert(isFinite(value));
             storage = value;
             this._current = value;
@@ -47,7 +47,7 @@ module Random = proto {
     /**
      * returns a random float between 0 and 1 (exclusive)
      */
-    get: function() {
+    get: func() {
         var value = Math.sin(this._current++) * 10000;
         return value - Math.floor(value);
     },
@@ -55,7 +55,7 @@ module Random = proto {
     /**
      * returns a random float between min and max (exclusive)
      */
-    float: function(min, max) {
+    float: func(min, max) {
         var value = Math.sin(this._current++) * 10000;
         return (value - Math.floor(value)) * (max - min) + min;
     },
@@ -63,7 +63,7 @@ module Random = proto {
     /**
      * returns a random integer between min and max (exclusive)
      */
-    int: function(min, max) {
+    int: func(min, max) {
         var value = Math.sin(this._current++) * 10000;
         return Math.floor((value - Math.floor(value)) * (max - min) + min);
     },

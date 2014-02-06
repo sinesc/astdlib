@@ -23,7 +23,7 @@
  */
 var merge = require('./merge');
 
-export extend = function() {
+export extend = func() {
     merge(DateExtensions, Date);
     merge(DateExtensions.prototype, Date.prototype);
 };
@@ -43,30 +43,30 @@ var dateLocale = {
     },
 };
 
-var zeroPad = function(number) {
+var zeroPad = func(number) {
     return ('0' + number).substr(-2,2);
 };
 
 var dateMarkers = {
-    d: [ 'getDate', function(v) { return zeroPad(v); } ],
-    m: [ 'getMonth', function(v) { return zeroPad(v+1); } ],
-    n: [ 'getMonth', function(v, locale) { return locale.months[v]; } ],
-    w: [ 'getDay', function(v, locale) { return locale.days[v]; } ],
+    d: [ 'getDate', func(v) { return zeroPad(v); } ],
+    m: [ 'getMonth', func(v) { return zeroPad(v+1); } ],
+    n: [ 'getMonth', func(v, locale) { return locale.months[v]; } ],
+    w: [ 'getDay', func(v, locale) { return locale.days[v]; } ],
     y: [ 'getFullYear' ],
-    H: [ 'getHours', function(v) { return zeroPad(v); } ],
-    M: [ 'getMinutes', function(v) { return zeroPad(v); } ],
-    S: [ 'getSeconds', function(v) { return zeroPad(v); } ],
+    H: [ 'getHours', func(v) { return zeroPad(v); } ],
+    M: [ 'getMinutes', func(v) { return zeroPad(v); } ],
+    S: [ 'getSeconds', func(v) { return zeroPad(v); } ],
     i: [ 'toISOString' ]
 };
 
 module DateExtensions = proto {
 
-    format: function(formatString, localeName = 'enGB') {
+    format: func(formatString, localeName = 'enGB') {
 
         var self = this;
         var locale = dateLocale[localeName];
 
-        return formatString.replace(/%(.)/g, function(m, p) {
+        return formatString.replace(/%(.)/g, func(m, p) {
 
             // call first datemarker function for this part
 

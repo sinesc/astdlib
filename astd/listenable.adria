@@ -27,7 +27,7 @@ var ArrayExtensions = require('./prototype/array');
 
 module Listenable = proto {
 
-    _listener: property {
+    _listener: prop {
         value: null,
         writable: true,
     },
@@ -38,7 +38,7 @@ module Listenable = proto {
      *
      * @param listenable
      */
-    subscribe: function(listenable) {
+    subscribe: func(listenable) {
 
         assert(listenable instanceof Listenable);
 
@@ -53,7 +53,7 @@ module Listenable = proto {
      *
      * @param listenable
      */
-    unsubscribe: function(listenable) {
+    unsubscribe: func(listenable) {
 
         offCallback(listenable._listener['_'], this, null);
     },
@@ -64,7 +64,7 @@ module Listenable = proto {
      * @param eventName event to trigger
      * @param ... optional parameters passed to listeners
      */
-    execute: function(eventName) {
+    execute: func(eventName) {
 
         if (this._listener === null || (this._listener[eventName] === undefined && this._listener['_'] === undefined)) {
             return;
@@ -114,7 +114,7 @@ module Listenable = proto {
      *
      * @see execute
      */
-    trigger: function(eventName) {
+    trigger: func(eventName) {
         util.defer(this, arguments, this.execute);
     },
 
@@ -126,7 +126,7 @@ module Listenable = proto {
      * @param context optional context to run listener in
      * @param callback called when the event is triggered
      */
-    on: function(eventName, params, context, callback, once) {
+    on: func(eventName, params, context, callback, once) {
 
         // handle array of events
 
@@ -174,7 +174,7 @@ module Listenable = proto {
      *
      * @see Listenable::on()
      */
-    once: function(eventName, params, context, callback) {
+    once: func(eventName, params, context, callback) {
         this.on(eventName, params, context, callback, true);
     },
 
@@ -185,7 +185,7 @@ module Listenable = proto {
      * @param context
      * @param callback
      */
-    off: function(eventName, context, callback) {
+    off: func(eventName, context, callback) {
 
         // handle array of events
 
@@ -225,7 +225,7 @@ module Listenable = proto {
     },
 };
 
-var initListener = function(eventName) {
+var initListener = func(eventName) {
 
     if (this._listener === null) {
         this._listener = { };
@@ -236,7 +236,7 @@ var initListener = function(eventName) {
     }
 };
 
-var offListener = function(eventListener, listener) {
+var offListener = func(eventListener, listener) {
 
     assert(listener instanceof Listener);
 
@@ -252,7 +252,7 @@ var offListener = function(eventListener, listener) {
     return false;
 };
 
-var offCallback = function(eventListener, context, callback) {
+var offCallback = func(eventListener, context, callback) {
 
     assert(context instanceof Object);
     assert(typeof callback === 'function' || callback === null);
@@ -276,7 +276,7 @@ export Listener = proto {
     callback    : null,
     once        : false,
 
-    constructor: function(params, context, callback, once) {
+    constructor: func(params, context, callback, once) {
 
         assert(params instanceof Array);
         assert(context instanceof Object);

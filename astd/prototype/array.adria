@@ -23,7 +23,7 @@
  */
 var merge = require('./merge');
 
-export extend = function() {
+export extend = func() {
     merge(ArrayExtensions, Array);
     merge(ArrayExtensions.prototype, Array.prototype);
 };
@@ -35,8 +35,8 @@ module ArrayExtensions = proto {
      *
      * returns the first array element id or null
      */
-    first: property {
-        get: function() {
+    first: prop {
+        get: func() {
             for (var i in this) {
                 return parseInt(i);
             }
@@ -49,8 +49,8 @@ module ArrayExtensions = proto {
      *
      * inserts a value at the end of the array and returns its index
      */
-    insert: property {
-        value: function(value) {
+    insert: prop {
+        value: func(value) {
             return this.push(value) -1;
         }
     },
@@ -73,8 +73,8 @@ module ArrayExtensions = proto {
      *     }
      * }
      */
-    remove: property {
-        value: function(id) {
+    remove: prop {
+        value: func(id) {
             assert(typeof id === 'number');
             assert(id < this.length);
 
@@ -83,8 +83,8 @@ module ArrayExtensions = proto {
         }
     },
 
-    unique: property {
-        value: function(arr) {
+    unique: prop {
+        value: func(arr) {
             var hash = {}, result = [];
             for ( var i = 0, l = this.length; i < l; ++i ) {
                 if ( !hash.hasOwnProperty(this[i]) ) {

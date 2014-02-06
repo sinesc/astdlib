@@ -23,7 +23,7 @@
  */
 var merge = require('./merge');
 
-export extend = function() {
+export extend = func() {
     merge(NumberExtensions, Number);
     merge(NumberExtensions.prototype, Number.prototype);
 };
@@ -35,8 +35,8 @@ module NumberExtensions = proto {
      *
      * @return int
      */
-    sgn: property {
-        get: function() {
+    sgn: prop {
+        get: func() {
             return (this > 0) - (this < 0);
         }
     },
@@ -46,8 +46,8 @@ module NumberExtensions = proto {
      *
      * @return boolean
      */
-    even: property {
-        get: function() {
+    even: prop {
+        get: func() {
             return this % 2 === 0;
         }
     },
@@ -57,8 +57,8 @@ module NumberExtensions = proto {
      *
      * @return boolean
      */
-    odd: property {
-        get: function() {
+    odd: prop {
+        get: func() {
             return this % 2 === 1;
         }
     },

@@ -27,7 +27,7 @@
  */
 module Map = proto {
 
-    constructor: function(key, value) {
+    constructor: func(key, value) {
 
         this.data = Object.create(null);
 
@@ -43,7 +43,7 @@ module Map = proto {
      * @param Map, ... maps to merge
      * @return Map resulting Map
      */
-    merge: function() {
+    merge: func() {
 
         var args    = Array::slice.call(arguments, 0);
         var result  = new Map();
@@ -67,7 +67,7 @@ module Map = proto {
      * @param key string key or Map
      * @param value omit when key is a Map
      */
-    set: function(key, value) {
+    set: func(key, value) {
 
         var data = this.data;
 
@@ -87,7 +87,7 @@ module Map = proto {
         return this;
     },
 
-    get: function(key) {
+    get: func(key) {
 
         return this.data[key];
     },
@@ -97,7 +97,7 @@ module Map = proto {
      *
      * @param key
      */
-    unset: function(key) {
+    unset: func(key) {
 
         var data = this.data;
 
@@ -126,7 +126,7 @@ module Map = proto {
      * @param key
      * @return boolean
      */
-    has: function(key) {
+    has: func(key) {
 
         var data = this.data;
 
@@ -164,7 +164,7 @@ module Map = proto {
      * @param key
      * @return boolean
      */
-    lacks: function(key) {
+    lacks: func(key) {
         return this.has(key) === false;
     },
 
@@ -173,7 +173,7 @@ module Map = proto {
      *
      * @return Array
      */
-    keys: function() {
+    keys: func() {
         return Object.keys(this.data);
     },
 
@@ -182,7 +182,7 @@ module Map = proto {
      *
      * @return Array
      */
-    values: function() {
+    values: func() {
 
         var result = [];
 
@@ -198,8 +198,8 @@ module Map = proto {
      *
      * @return boolean
      */
-    empty: property {
-        get: function() {
+    empty: prop {
+        get: func() {
             for (var dummy in this.data) {
                 return false;
             }
@@ -212,8 +212,8 @@ module Map = proto {
      *
      * @return integer
      */
-    length: property {
-        get : function() {
+    length: prop {
+        get : func() {
             var len = 0;
             for (var dummy in this.data) {
                 len++;

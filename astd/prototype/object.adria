@@ -23,7 +23,7 @@
  */
 var merge = require('./merge');
 
-export extend = function() {
+export extend = func() {
     merge(ObjectExtensions, Object);
     merge(ObjectExtensions.prototype, Object.prototype);
 };
@@ -38,10 +38,13 @@ module ObjectExtensions = proto {
      * @param overwrite optional. if false, existing properties will no be overwritten
      * @param ... objects
      */
-    merge: property {
-        value: function(overwrite) {
-            var overwrite = (overwrite === true || overwrite === false ? overwrite : undefined);
-            var args = Array::slice.call(arguments, overwrite !== undefined ? 1 : 0);
+    merge: prop {
+        value: func(overwrite) {
+
+            var noFlag = overwrite instanceof Object;
+            var args = Array::slice.call(arguments, noFlag ? 0 : 1);
+
+            overwrite = (noFlag ? true : overwrite);
 
             for (var argId, argValue in args) {
                 var props = Object.getOwnPropertyNames(argValue);
@@ -68,8 +71,8 @@ module ObjectExtensions = proto {
      *
      * @return object
      */
-    clone: property {
-        value: function() {
+    clone: prop {
+        value: func() {
             return Object.create(Object.getPrototypeOf(this));
         },
         writable: true,

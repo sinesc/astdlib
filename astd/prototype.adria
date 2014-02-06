@@ -22,7 +22,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-export extend = function() {
+export extend = func() {
     for (var protoName in prototype) {
         if (protoName !== 'extend') {
             prototype[protoName].extend();

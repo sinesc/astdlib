@@ -22,7 +22,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-module merge = function(from, to) {
+module merge = func(from, to) {
 
     var props = Object.getOwnPropertyNames(from);
 

@@ -23,7 +23,7 @@
  */
 var merge = require('./merge');
 
-export extend = function() {
+export extend = func() {
     merge(FunctionExtensions, Function);
     merge(FunctionExtensions.prototype, Function.prototype);
 };
@@ -33,7 +33,7 @@ module FunctionExtensions = proto {
     /**
      * invoke a constructor with variable arguments
      */
-    construct: function(argsArray) {
+    construct: func(argsArray) {
 
         // first parameter is ignored, push arguments behind it
 
@@ -51,7 +51,7 @@ module FunctionExtensions = proto {
      *
      * @param constructor constructor whose prototype is to be copied
      */
-    mixin: function(constructor) {
+    mixin: func(constructor) {
 
         var thisProto = this.prototype;
         var otherProto = constructor.prototype;

@@ -27,7 +27,7 @@
  */
 module Set = proto {
 
-    constructor: function(value) {
+    constructor: func(value) {
 
         this.data = Object.create(null);
 
@@ -43,7 +43,7 @@ module Set = proto {
      * @param Set, ... sets to merge
      * @return Set resulting Set
      */
-    merge: function() {
+    merge: func() {
 
         var args    = Array.prototype.slice.call(arguments, 0);
         var result  = new Set();
@@ -66,13 +66,13 @@ module Set = proto {
      *
      * @param value
      */
-    add: function(value) {
+    add: func(value) {
 
         var data = this.data;
 
         if (value instanceof Array) {
 
-            value.forEach(function(element) {
+            value.forEach(func(element) {
                 data[element] = true;
             });
 
@@ -95,13 +95,13 @@ module Set = proto {
      *
      * @param value
      */
-    remove: function(value) {
+    remove: func(value) {
 
         var data = this.data;
 
         if (value instanceof Array) {
 
-            value.forEach(function(element) {
+            value.forEach(func(element) {
                 delete data[element];
             });
 
@@ -124,7 +124,7 @@ module Set = proto {
      * @param value
      * @return boolean
      */
-    has: function(value) {
+    has: func(value) {
 
         var data = this.data;
 
@@ -162,7 +162,7 @@ module Set = proto {
      * @param value
      * @return boolean
      */
-    lacks: function(value) {
+    lacks: func(value) {
         return this.has(value) === false;
     },
 
@@ -172,7 +172,7 @@ module Set = proto {
      * @param value
      * @return boolean
      */
-    missing: function(value) {
+    missing: func(value) {
 
         var result = new Set();
         var data = this.data;
@@ -208,7 +208,7 @@ module Set = proto {
      *
      * @return Array
      */
-    toArray: function() {
+    toArray: func() {
         return Object.keys(this.data);
     },
 
@@ -217,8 +217,8 @@ module Set = proto {
      *
      * @return boolean
      */
-    empty: property {
-        get : function() {
+    empty: prop {
+        get : func() {
             for (var dummy in this.data) {
                 return false;
             }
@@ -231,8 +231,8 @@ module Set = proto {
      *
      * @return integer
      */
-    length: property {
-        get : function() {
+    length: prop {
+        get : func() {
             var len = 0;
             for (var dummy in this.data) {
                 len++;

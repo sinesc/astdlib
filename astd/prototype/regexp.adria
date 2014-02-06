@@ -23,7 +23,7 @@
  */
 var merge = require('./merge');
 
-export extend = function() {
+export extend = func() {
     merge(RegExpExtensions, RegExp);
     merge(RegExpExtensions.prototype, RegExp.prototype);
 };
@@ -39,6 +39,6 @@ module RegExpExtensions = proto {
  * @param string
  * @return escapedString
  */
-export escape = function(string) {
+export escape = func(string) {
     return string.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 };

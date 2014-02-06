@@ -23,7 +23,7 @@
  */
 var merge = require('./merge');
 
-export extend = function() {
+export extend = func() {
     merge(MathExtensions, Math);
 };
 
@@ -35,7 +35,7 @@ module MathExtensions = { };
  * @param itemTable object { itemKey.1 : itemChance.1, itemKey.2 : itemChance.2, ... } with sum(itemChance) < = 1
  * @return itemKey or null if total chance < 1 and algorithm did not select an item
  */
-export pick = function(itemTable) {
+export pick = func(itemTable) {
 
     var chance = Math.random();
     var total = 0;
@@ -58,7 +58,7 @@ export pick = function(itemTable) {
  * @param range
  * @return result
  */
-export tailDist = function(range) {
+export tailDist = func(range) {
     return Math.floor(Math.sqrt(Math.random() * range * range));
 };
 
@@ -68,7 +68,7 @@ export tailDist = function(range) {
  * @param range
  * @return result
  */
-export headDist = function(range) {
+export headDist = func(range) {
     return range -1 - Math.floor(Math.sqrt(Math.random() * range * range));
 };
 
@@ -79,7 +79,7 @@ export headDist = function(range) {
  * @param max maximum value to return
  * @return result
  */
-export rand = function(min, max) {
+export rand = func(min, max) {
     return Math.random() * (max - min) + min;
 };
 
@@ -90,7 +90,7 @@ export rand = function(min, max) {
  * @param max maximum value to return
  * @return result
  */
-export randInt = function(min, max) {
+export randInt = func(min, max) {
     return Math.round(Math.random() * (max - min) + min);
 };
 
@@ -99,6 +99,6 @@ export randInt = function(min, max) {
  *
  * @return int
  */
-export sgn = function(value) {
+export sgn = func(value) {
     return (value > 0) - (value < 0);
 };
