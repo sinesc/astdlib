@@ -155,19 +155,26 @@ module StringExtensions = proto {
                 return '$' + matchname + (optmatch !== undefined ? optmatch : '');
             }
 
+            // formatting options
+
             var formatted = args[matchname];
 
-            if (options.slice(-1) === '.') {
-                options = options.slice(0, -1);
+            if (options !== undefined) {
+
+                if (options.slice(-1) === '.') {
+                    options = options.slice(0, -1);
+                }
+
+                if (options === 'currency') {
+                    formatted = Math.floor(formatted * 100) / 100;
+                }
+
+                if (options.substr(0, 4) === 'pad:') {
+                    formatted = String::padLeft.call(''+formatted, options.substr(4), ' ');
+                }
             }
 
-            if (options === 'currency') {
-                formatted = Math.floor(formatted * 100) / 100;
-            }
-
-            if (options.substr(0, 4) === 'pad:') {
-                formatted = String::padLeft.call(''+formatted, options.substr(4), ' ');
-            }
+            // replace and return
 
             return (args[matchname] !== undefined ? prefix + formatted : str);
         });
@@ -254,11 +261,11 @@ module StringExtensions = proto {
      * @param mode either " or ', if neither, string will be escaped for both cases
      * @return escapedString
      */
-    jsify: func(mode) {
+    jsify: func(quoteType) {
 
-        if (mode === "'") {
+        if (quoteType === "'") {
             return this.replace(/([\\'])/g, "\\$1").replace(/\r?\n/g, '\\n\\\n').replace(/\0/g, "\\0");
-        } else if (mode === '"') {
+        } else if (quoteType === '"') {
             return this.replace(/([\\"])/g, "\\$1").replace(/\r?\n/g, '\\n\\\n').replace(/\0/g, "\\0");
         } else {
             return this.replace(/([\\"'])/g, "\\$1").replace(/\r?\n/g, '\\n\\\n').replace(/\0/g, "\\0");

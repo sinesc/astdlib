@@ -1,0 +1,200 @@
+/*
+ * Adria Standard Library
+ *
+ * Copyright (C) 2014 Dennis Möhlmann <mail@dennismoehlmann.de>
+ * Licensed under the MIT license.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+/**
+ * @module Template
+ * @description minimalistic JS template engine
+ */
+module Template = proto {
+
+    data                    : null,
+    debug                   : false,
+    statementDelimiters     : [ '{!', '!}' ],
+    expressionDelimiters    : [ '{%', '%}' ],
+    commentDelimiters       : [ '{*', '*}' ],
+    source                  : '',
+    preprocessors           : null,
+
+    constructor: func() {
+
+        this.data = { };
+        this.preprocessors = { };
+    },
+
+    /**
+     * assign data/object/function to template
+     *
+     * @param string name reference name from within template file, alternatively object to merge into data (leave out value)
+     * @param any value data/object/function to assign
+     */
+    assign: func(name, value) {
+
+        if (name instanceof Object && value === undefined) {
+            this.data.merge(name);
+        } else {
+            assert(typeof name === 'string');
+            this.data[name] = value;
+        }
+    },
+
+    /**
+     * register a preprocessor statement with the template
+     *
+     * @param string name reference name from within template file
+     * @param object context execution context for handler
+     * @param function handler function, should return template code
+     */
+    registerPreprocessor: func(name, context, handler) {
+
+        if (typeof context === 'function' && handler === undefined) {
+            handler = context;
+            context = this;
+        }
+
+        this.preprocessors[name] = handler.bind(context);
+    },
+
+    /**
+     * prepare for parsing
+     */
+    setup: func() {
+
+        var openStatement   = RegExp.escape(this.statementDelimiters[0]);
+        var closeStatement  = RegExp.escape(this.statementDelimiters[1]);
+        var openExpression  = RegExp.escape(this.expressionDelimiters[0]);
+        var closeExpression = RegExp.escape(this.expressionDelimiters[1]);
+        var openComment     = RegExp.escape(this.commentDelimiters[0]);
+        var closeComment    = RegExp.escape(this.commentDelimiters[1]);
+
+        var statement = '(' + openStatement + ').+?' + closeStatement;      // match 1
+        var expression = '(' + openExpression + ').+?' + closeExpression;   // match 2
+        var comment = '(' + openComment + ')[\\s\\S]+?' + closeComment;     // match 3
+        var text = '(?:(?!' + openStatement + '|' + openExpression + '|' + openComment + ')[\\s\\S])+';
+
+        return new RegExp(statement + '|' + expression + '|' + comment + '|' + text, 'g');
+    },
+
+    /**
+     * convert template to javascript code
+     *
+     * @param string template text
+     * @return string source-code
+     */
+    parse: func(input) {
+
+        var regexp = this.setup();
+        var match;
+        var jsString = '';
+
+        while (match = regexp.exec(input)) {
+
+            // handle string, statement, expression and comment
+
+            if (match[1] === undefined && match[2] === undefined && match[3] === undefined) {
+
+                jsString += 'this.source += "' + match[0].jsify('"') + '";\n';
+
+            } else if (match[1] !== undefined) {
+
+                var preprocessor, statement = match[0].slice(2, -2);
+
+                statement = statement.replace(/\:\s*$/, '{');
+                statement = statement.replace(/^\s*while/, '} while');
+                statement = statement.replace(/^\s*end(if|for|while)/, '}');
+
+                if ((preprocessor = this.checkPreprocessor(statement)) !== null) {
+                    jsString += this.runPreprocessor(preprocessor, statement);
+                } else {
+                    jsString += statement + '\n';
+                }
+
+            } else if (match[2] !== undefined) {
+
+                jsString += 'this.source += ' + match[0].slice(2, -2) + ';\n';
+
+            } else if (this.debug && match[3] !== undefined) {
+
+                jsString += 'this.source += "/*' + match[0].slice(2, -2).jsify('"') + '*/";\n';
+            }
+        }
+
+        return jsString;
+    },
+
+    /**
+     * check if statement is a preprocessor
+     *
+     * @param string statement
+     * @return string/null proprocessor name/null
+     */
+    checkPreprocessor: func(statement) {
+
+        var nameMatch = statement.match(/^\s*([a-z][a-z0-9_]*)\s*\(/);
+
+        if (nameMatch !== null && this.preprocessors[nameMatch[1]] !== undefined) {
+            return nameMatch[1];
+        } else {
+            return null;
+        }
+    },
+
+    /**
+     * run given preprocessor statement
+     *
+     * @param string name
+     * @param string statement
+     * @return string template code
+     */
+    runPreprocessor: func(name, statement) {
+        return eval('(function() { var ' + name + ' = this.preprocessors[name]; return ' + statement + '; }).call(this)');
+    },
+
+    /**
+     * run generated template code, return result
+     *
+     * @param string source-code
+     * @return string output
+     */
+    exec: func(tplString) {
+
+        var varDefs = 'this.source = "";\n';
+
+        for (var name, value in this.data) {
+            varDefs += 'var ' + name + ' = this.data.' + name + ';\n';
+        }
+
+        return eval('(function() { ' + varDefs + tplString + 'return this.source; }).call(this)');
+    },
+
+    /**
+     * short-cut method to parse and exec template
+     *
+     * @param string template text
+     */
+    fetch: func(input) {
+
+        return this.exec(this.parse(input));
+    },
+
+};
