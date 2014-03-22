@@ -22,11 +22,19 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+var Set = require('./set');
+
 /**
  * map type
  */
 module Map = proto {
 
+    /**
+     * construct instance, optionally set element or add Map/Object to this Map
+     *
+     * @param mixed key string key, Map or Object
+     * @param mixed value omit when key is a Map
+     */
     constructor: func(key, value) {
 
         this.data = Object.create(null);
@@ -43,17 +51,16 @@ module Map = proto {
      * @param Map, ... maps to merge
      * @return Map resulting Map
      */
-    merge: func() {
+    merge: func(...maps) {
 
-        var args    = Array::slice.call(arguments, 0);
-        var result  = new Map();
+        var result = new Map();
 
         for (var key, value in this.data) {
             result.data[key] = value;
         }
 
-        for (var id in args) {
-            for (var key, value in args[id].data) {
+        for (var id in maps) {
+            for (var key, value in maps[id].data) {
                 result.data[key] = value;
             }
         }
@@ -62,20 +69,21 @@ module Map = proto {
     },
 
     /**
-     * set element or add Map to this Map
+     * set element or add Map/Object to this Map
      *
-     * @param key string key or Map
-     * @param value omit when key is a Map
+     * @param mixed key string key, Map or Object
+     * @param mixed value omit when key is a Map
      */
     set: func(key, value) {
 
         var data = this.data;
 
-        if (key instanceof Map) {
+        if (typeof key === 'object') {
 
             assert(value === undefined);
+            var source = (key instanceof Map ? key.data : key);
 
-            for (var mapKey, mapValue in value.data) {
+            for (var mapKey, mapValue in source) {
                 data[mapKey] = mapValue;
             }
 
@@ -87,7 +95,31 @@ module Map = proto {
         return this;
     },
 
-    get: func(key) {
+    /**
+     * increment given key by value. sets key to value if it doesn't exist yet
+     *
+     * @param scalar key
+     * @param finite value
+     */
+    inc: func(scalar key, finite value = 1) {
+
+        if (key in this.data) {
+            this.data[key]++;
+        } else {
+            this.data[key] = value;
+        }
+    },
+
+    /**
+     * returns a value from the map
+     *
+     * @param scalar key
+     */
+    get: func(scalar key) {
+
+        if (this.lacks(key)) {
+            throw new Exception('key "' + key + '" not defined in map');
+        }
 
         return this.data[key];
     },
@@ -95,7 +127,7 @@ module Map = proto {
     /**
      * remove element, array of elements or Set from this Map
      *
-     * @param key
+     * @param any key array, set or string
      */
     unset: func(key) {
 
@@ -103,17 +135,18 @@ module Map = proto {
 
         if (key instanceof Array) {
 
-            for (var k, arrayValue in key) {
-                delete data[arrayValue];
+            for (var _, item in key) {
+                delete data[item];
             }
 
-        } /*else if (value instanceof Set) {
+        } else if (key instanceof Set) {
 
-            for (var element in value.data) {
-                delete data[element];
+            for (var item in key.data) {
+                delete data[item];
             }
 
-        }*/ else {
+        } else {
+
             delete data[key];
         }
 
@@ -123,7 +156,7 @@ module Map = proto {
     /**
      * check if map has single key, all values of array or set
      *
-     * @param key
+     * @param key mixed key array, set or string
      * @return boolean
      */
     has: func(key) {
@@ -132,27 +165,25 @@ module Map = proto {
 
         if (key instanceof Array) {
 
-            for (var id in key) {
-                if (key[id] in data !== true) {
+            for (var _, item in key) {
+                if (item in data !== true) {
                     return false;
                 }
             }
 
             return true;
 
-        }/* else if (key instanceof Set) {
+        } else if (key instanceof Set) {
 
-            var other = key.data;
-
-            for (var otherKey in other) {
-                if (otherKey in data !== true) {
+            for (var item in key.data) {
+                if (item in data !== true) {
                     return false;
                 }
             }
 
             return true;
 
-        }*/ else {
+        } else {
 
             return (key in data);
         }
@@ -161,7 +192,7 @@ module Map = proto {
     /**
      * check if map lacks single key, all values of array or set
      *
-     * @param key
+     * @param key mixed key array, set or string
      * @return boolean
      */
     lacks: func(key) {
@@ -186,7 +217,7 @@ module Map = proto {
 
         var result = [];
 
-        for (var key, value in this.data) {
+        for (var _, value in this.data) {
             result.push(value);
         }
 
@@ -200,7 +231,7 @@ module Map = proto {
      */
     empty: prop {
         get: func() {
-            for (var dummy in this.data) {
+            for (var _ in this.data) {
                 return false;
             }
             return true;
@@ -215,11 +246,28 @@ module Map = proto {
     length: prop {
         get : func() {
             var len = 0;
-            for (var dummy in this.data) {
+            for (var _ in this.data) {
                 len++;
             }
             return len;
         },
+    },
+
+    /**
+     * returns first map key with given searchValue
+     *
+     * @param string searchValue
+     * @param any notFoundResult returned when value is not found
+     */
+    find: func(searchValue, notFoundResult = undefined) {
+
+        for (var key, value in this.data) {
+            if (value === searchValue) {
+                return key;
+            }
+        }
+
+        return notFoundResult;
     },
 
 };

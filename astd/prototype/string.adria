@@ -137,9 +137,7 @@ module StringExtensions = proto {
      * string format
      * !TODO
      */
-    format: func() {
-
-        var args = Array::slice.call(arguments);
+    format: func(...args) {
 
         // if first argument is array or object, use only that
 
@@ -147,12 +145,12 @@ module StringExtensions = proto {
             args = args[0];
         }
 
-        return this.replace(/(.?)\$([0-9a-z]+)(\:([0-9a-z\:\-]+\.?))?/ig, func(str, prefix, matchname, optmatch, options) {
+        return this.replace(/(.?)\$([0-9a-z]+)(\:([0-9a-z\:\-]+))?(\.?)/ig, func(str, prefix, matchname, optmatch, options, separator) {
 
-            // double $$ means to output a $ instead of a formatstring
+            // double $$ means to output a $ instead of a format-string
 
             if (prefix === '$') {
-                return '$' + matchname + (optmatch !== undefined ? optmatch : '');
+                return '$' + matchname + (optmatch !== undefined ? optmatch : '') + (separator !== undefined ? separator : '');
             }
 
             // formatting options

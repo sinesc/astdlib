@@ -64,7 +64,7 @@ module Listenable = proto {
      * @param eventName event to trigger
      * @param ... optional parameters passed to listeners
      */
-    execute: func(eventName) {
+    execute: func(eventName, ...args) {
 
         if (this._listener === null || (this._listener[eventName] === undefined && this._listener['_'] === undefined)) {
             return;
@@ -72,7 +72,6 @@ module Listenable = proto {
 
         // handle listeners
 
-        var args = Array::slice.call(arguments, 1);
         var eventListener = this._listener[eventName];
 
         if (eventListener !== undefined) {
@@ -121,52 +120,24 @@ module Listenable = proto {
     /**
      * subscribe to given event
      *
-     * @param eventName
-     * @param params optional parameters to pass as first arguments to listener
-     * @param context optional context to run listener in
-     * @param callback called when the event is triggered
+     * @param string eventName
+     * @param Array params optional parameters to pass as first arguments to listener
+     * @param mixed context optional context to run listener in
+     * @param function callback called when the event is triggered
      */
-    on: func(eventName, params, context, callback, once) {
+    on: func(eventName, [ [ params = [] ], context = this ], callback) {
 
-        // handle array of events
-
-        if (eventName instanceof Array) {
-            var args = Array::slice.call(arguments);
-            for (var id, name in eventName) {
-                args[0] = name;
-                this.on.apply(this, args);
-            }
+        if (expand.call(this, this.on, arguments, 0)) {
             return;
         }
 
         assert(typeof eventName === 'string');
-        assert(once === undefined || arguments.length === 5);
-
-        if (context === undefined) {
-            assert(arguments.length === 2 || once === true);
-            callback = params;
-            context = this;
-            params = [];
-            once = (once === undefined ? false : once);
-        } else if (callback === undefined) {
-            assert(arguments.length === 3 || once === true);
-            callback = context;
-            context = params;
-            params = [];
-            once = (once === undefined ? false : once);
-        } else if (once === undefined) {
-            assert(arguments.length === 4);
-            once = false;
-        }
-
         assert(params instanceof Array);
         assert(context === null || context instanceof Object);
         assert(typeof callback === 'function');
 
-        // attach listener
-
         initListener.call(this, eventName);
-        this._listener[eventName].push(new Listener(params, context, callback, once));
+        this._listener[eventName].push(new Listener(params, context, callback, false));
     },
 
     /**
@@ -174,8 +145,19 @@ module Listenable = proto {
      *
      * @see Listenable::on()
      */
-    once: func(eventName, params, context, callback) {
-        this.on(eventName, params, context, callback, true);
+    once: func(eventName, [ [ params = [] ], context = this ], callback) {
+
+        if (expand.call(this, this.once, arguments, 0)) {
+            return;
+        }
+
+        assert(typeof eventName === 'string');
+        assert(params instanceof Array);
+        assert(context === null || context instanceof Object);
+        assert(typeof callback === 'function');
+
+        initListener.call(this, eventName);
+        this._listener[eventName].push(new Listener(params, context, callback, true));
     },
 
     /**
@@ -187,14 +169,8 @@ module Listenable = proto {
      */
     off: func(eventName, context, callback) {
 
-        // handle array of events
-
-        if (eventName instanceof Array) {
-            var args = Array::slice.call(arguments);
-            for (var id, name in eventName) {
-                args[0] = name;
-                this.off.apply(this, args);
-            }
+        if (expand.call(this, this.off, arguments, 0)) {
+            return;
         }
 
         // check if anything is registered at all
@@ -225,50 +201,11 @@ module Listenable = proto {
     },
 };
 
-var initListener = func(eventName) {
-
-    if (this._listener === null) {
-        this._listener = { };
-    }
-
-    if (this._listener[eventName] === undefined) {
-        this._listener[eventName] = [ ];
-    }
-};
-
-var offListener = func(eventListener, listener) {
-
-    assert(listener instanceof Listener);
-
-    var id = eventListener.length;
-
-    while (id--) {
-        if (eventListener[id] === listener) {
-            ArrayExtensions::remove.call(eventListener, id);
-            return true;
-        }
-    }
-
-    return false;
-};
-
-var offCallback = func(eventListener, context, callback) {
-
-    assert(context instanceof Object);
-    assert(typeof callback === 'function' || callback === null);
-
-    var id = eventListener.length;
-
-    while (id--) {
-        if (eventListener[id].context === context && eventListener[id].callback === callback) {
-            ArrayExtensions::remove.call(eventListener, id);
-            return true;
-        }
-    }
-
-    return false;
-};
-
+/**
+ * @proto Listener
+ *
+ * stores information about how to invoke a registered listener
+ */
 export Listener = proto {
 
     params      : null,
@@ -288,4 +225,91 @@ export Listener = proto {
         this.callback = callback;
         this.once = once;
     },
+};
+
+/**
+ * expands given function argument from array to multiple calls per array item
+ *
+ * @param func fn function to expand
+ * @param arguments args original function arguments
+ * @param int argId id of argument to expand
+ */
+var expand = func(fn, args, argId) {
+
+    var expansionArg = args[argId];
+
+    if (expansionArg instanceof Array) {
+        args = Array::slice.call(args);
+        for (var _, value in expansionArg) {
+            args[argId] = value;
+            fn.apply(this, args);
+        }
+        return true;
+    }
+
+    return false;
+};
+
+/**
+ * ensures instance properties a set up to listen to given event
+ *
+ * @param string eventName
+ */
+var initListener = func(eventName) {
+
+    if (this._listener === null) {
+        this._listener = { };
+    }
+
+    if (this._listener[eventName] === undefined) {
+        this._listener[eventName] = [ ];
+    }
+};
+
+/**
+ * remove listener by listener object
+ *
+ * @param Array eventListener array of listeners from which to remove given listener
+ * @param Listener listener
+ * @return boolean true if a listener was removed
+ */
+var offListener = func(eventListener, listener) {
+
+    assert(listener instanceof Listener);
+
+    var id = eventListener.length;
+
+    while (id--) {
+        if (eventListener[id] === listener) {
+            ArrayExtensions::remove.call(eventListener, id);
+            return true;
+        }
+    }
+
+    return false;
+};
+
+/**
+ * remove listener by context and callback
+ *
+ * @param Array eventListener array of listeners from which to remove given listener
+ * @param Object context
+ * @param function callback
+ * @return boolean true if a listener was removed
+ */
+var offCallback = func(eventListener, context, callback) {
+
+    assert(context instanceof Object);
+    assert(typeof callback === 'function' || callback === null);
+
+    var id = eventListener.length;
+
+    while (id--) {
+        if (eventListener[id].context === context && eventListener[id].callback === callback) {
+            ArrayExtensions::remove.call(eventListener, id);
+            return true;
+        }
+    }
+
+    return false;
 };

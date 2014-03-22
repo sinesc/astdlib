@@ -21,9 +21,11 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-var thrown, testId, start, last, oks, fails, exceptions;
+var Async = require('async');
 
 // ensure the test was compiled with assertions enabled
+
+var thrown = null;
 
 try {
     assert(false);
@@ -31,7 +33,7 @@ try {
     thrown = e;
 }
 
-if (thrown === undefined) {
+if (thrown === null) {
     console.log('assertion support is disabled, please recompile with --assert');
     process.exit(1);
 }
@@ -41,70 +43,255 @@ if (thrown.stack.split(':', 1)[0] !== 'AssertionFailedException') {
     process.exit(1);
 }
 
+console.log('Adria unit tests, version {{version}}');
 
 // set up module
 
-module test = func(name, fn) {
+var testId      = 0;
+var testName    = '';
+var start       = Date.now();
+var last        = start;
+var oks         = 0;
+var fails       = 0;
+var exceptions  = [ ];
+var asyncTimer  = null;
+var inAsync     = false;
+var queue       = [ ];
 
-    var success = true;
+/**
+ * queues a test case
+ *
+ * @param string name test case name
+ * @param int timout optional timeout in ms for async tests
+ * @param function testFunction the function containing the test case, receives callback for async use as first parameter
+ */
+module test = func(name, timeout, testFunction) {
 
-    log('test ' + testId++ + ': ' + name + ' ', false);
+    // handle optional parameter async timeout
 
-    try {
-        fn();
-    } catch (e) {
-        success = false;
-        exceptions.push(e);
-        fails++;
-        print('FAIL');
+    if (typeof timeout === 'function') {
+        testFunction = timeout;
+        timeout = 1000;
     }
 
-    if (success) {
-        oks++;
-        print('ok');
+    queue.push({ type: 'test', name: name, test: testFunction, timeout: timeout });
+
+    if (inAsync) {
+        return;
+    } else {
+        consume();
     }
 };
 
+/**
+ * an exception that includes test id and name in the stacktrace
+ */
+export TestException = proto (Exception) {
+
+    testId: -1,
+    testName: '',
+
+    constructor: func(message) {
+
+        Exception->constructor(message);
+
+        this.testId = testId;
+        this.testName = testName;
+
+        var stack = this.stack.split('\n');
+        stack.splice(1, 0, '    in test ' + testId + ': ' + testName);
+        this.stack = stack.join('\n');
+    }
+};
+
+/**
+ * queues display of test results
+ */
+export summary = func() {
+
+    queue.push({ type: 'summary' });
+
+    if (inAsync) {
+        return;
+    } else {
+        consume();
+    }
+};
+
+/**
+ * queues a new group of tests (display purposes only)
+ */
+export group = func(title) {
+
+    queue.push({ type: 'group', title: title });
+
+    if (inAsync) {
+        return;
+    } else {
+        consume();
+    }
+};
+
+/**
+ * log a timestamped message to the console
+ *
+ * @param string message
+ * @param boolean append newline, default true
+ */
 export log = func(message, nl = true) {
 
     var now         = Date.now();
     var diffStart   = now - start;
     var diffLast    = now - last;
+    var timing      = '          ' + ('+' + diffLast + '/' + diffStart);
 
     last = now;
 
-    process.stdout.write(('+' + diffLast + '/' + diffStart) + 'ms: ' + message + (nl ? '\n' : ''));
+    process.stdout.write(timing.slice(-10) + 'ms: ' + message + (nl ? '\n' : ''));
 };
 
+/**
+ * log a message to the console
+ *
+ * @param string message
+ * @param boolean append newline, default true
+ */
 export print = func(message, nl = true) {
 
     process.stdout.write(message + (nl ? '\n' : ''));
 };
 
-export summary = func() {
+/**
+ * abort test and mark as failure
+ *
+ * @param string message
+ */
+export fail = func(message) {
+
+    throw new TestException(message);
+};
+
+/**
+ * consumes the next items in the queue until an asynchronous test is encountered and started
+ */
+var consume = func() {
+
+    while (queue.length > 0) {
+
+        var item = queue.shift();
+
+        if (item.type === 'test') {
+            if (runTest(item)) {
+                break;  // break here on async test and wait for callback
+            }
+        } else if (item.type === 'group') {
+            showGroup(item);
+        } else if (item.type === 'summary') {
+            showSummary();
+        }
+    }
+};
+
+/**
+ * callback passed to async functions, registers the result and advances to next test
+ *
+ * @param Exception exception if not null, test is marked as failed and the exception is reported in the summary
+ */
+var asyncCallback = func(exception = null) {
+
+    // callback was invoked before the the testfunction returned, ignore it, the function will be sync
+
+    if (inAsync === false) {
+        return;
+    }
+
+    // clear failover timeout, reset async status
+
+    clearTimeout(asyncTimer);
+    inAsync = false;
+    asyncTimer = null;
+
+    if (exception !== null) {
+        exceptions.push(exception);
+        fails++;
+        print('(FAILED)');
+    } else {
+        oks++;
+        print('(ok)');
+    }
+
+    // progress to next test
+
+    consume();
+};
+
+/**
+ * displays test summary
+ */
+var showSummary = func() {
 
     log((oks + fails) + ' tests done, ' + oks + ' ok, ' + fails + (fails > 0 ? ' FAILURES' : ' failures'));
 
     for (var id, exception in exceptions) {
-        console.log('failure ' + (+id + 1), exception.stack);
+        console.log('\nfailure ' + (+id + 1), exception.stack);
     }
 };
 
-export fail = func(message) {
+var showGroup = func(item) {
 
-    throw new Error(message);
+    process.stdout.write('\n');
+    log('group: ' + item.title);
 };
 
-export reset = func() {
+/**
+ * runs given test from queue
+ *
+ * @param Object item queue-item of the test
+ * @return boolean true if in test is asynchronous
+ */
+var runTest = func(item) {
 
-    testId      = 1;
-    start       = Date.now();
-    last        = start;
-    oks         = 0;
-    fails       = 0;
-    exceptions  = [ ];
+    var success = true;
+    var asyncObject = null;
+
+    testId++;
+
+    // log to console and update global testId/testName
+
+    log('test ' + testId + ': ' + item.name + ' ', false);
+    testName = item.name;
+
+    try {
+
+        if ((asyncObject = item.test(asyncCallback)) instanceof Async) {
+
+            // async test, exit here and wait for callback (or timeout failover)
+
+            if (asyncObject.done !== true) {
+
+                var exception = new TestException('Timeout after ' + item.timeout + 'ms');
+                asyncTimer = setTimeout(asyncCallback.bind(this, exception), item.timeout);
+                inAsync = true;
+
+                return true;
+            }
+        }
+
+    } catch (exception) {
+
+        // test failed, log exception
+
+        success = false;
+        exceptions.push(exception);
+        fails++;
+        print('(FAILED)');
+    }
+
+    if (success) {
+
+        oks++;
+        print('(ok)');
+    }
+
+    return false;
 };
-
-// start timer
-
-reset();

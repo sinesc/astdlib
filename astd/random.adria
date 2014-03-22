@@ -37,8 +37,7 @@ module Random = proto {
         get: func() {
             return storage;
         },
-        set: func(value) {
-            assert(isFinite(value));
+        set: func(finite value) {
             storage = value;
             this._current = value;
         },
@@ -55,7 +54,7 @@ module Random = proto {
     /**
      * returns a random float between min and max (exclusive)
      */
-    float: func(min, max) {
+    float: func(finite min, finite max) {
         var value = Math.sin(this._current++) * 10000;
         return (value - Math.floor(value)) * (max - min) + min;
     },
@@ -63,7 +62,7 @@ module Random = proto {
     /**
      * returns a random integer between min and max (exclusive)
      */
-    int: func(min, max) {
+    int: func(finite min, finite max) {
         var value = Math.sin(this._current++) * 10000;
         return Math.floor((value - Math.floor(value)) * (max - min) + min);
     },

@@ -27,6 +27,11 @@
  */
 module Set = proto {
 
+    /**
+     * create new Set and add element, array of elements or set to it
+     *
+     * @param mixed value array, set or string
+     */
     constructor: func(value) {
 
         this.data = Object.create(null);
@@ -37,36 +42,13 @@ module Set = proto {
     },
 
     /**
-     * merge one or more sets with current and return result
-     * does not modify this set
+     * add element, array of elements or set to this set
      *
-     * @param Set, ... sets to merge
-     * @return Set resulting Set
-     */
-    merge: func() {
-
-        var args    = Array.prototype.slice.call(arguments, 0);
-        var result  = new Set();
-
-        for (var key in this.data) {
-            result.data[key] = true;
-        }
-
-        for (var id in args) {
-            for (var key in args[id].data) {
-                result.data[key] = true;
-            }
-        }
-
-        return result;
-    },
-
-    /**
-     * add element, array of elements or Set to this Set
-     *
-     * @param value
+     * @param mixed value array, set or string
      */
     add: func(value) {
+
+        assert(value instanceof Array || value instanceof Set || typeof value === 'string' || typeof value === 'number');
 
         var data = this.data;
 
@@ -91,11 +73,13 @@ module Set = proto {
     },
 
     /**
-     * remove element, array of elements or Set from this Set
+     * remove element, array of elements or set from this set
      *
-     * @param value
+     * @param mixed value array, set or string
      */
     remove: func(value) {
+
+        assert(value instanceof Array || value instanceof Set || typeof value === 'string' || typeof value === 'number');
 
         var data = this.data;
 
@@ -119,19 +103,21 @@ module Set = proto {
     },
 
     /**
-     * check if set has single value, all values of array or set
+     * check if set has single value or all values of array or set
      *
-     * @param value
+     * @param mixed value array, set or string
      * @return boolean
      */
     has: func(value) {
+
+        assert(value instanceof Array || value instanceof Set || typeof value === 'string' || typeof value === 'number');
 
         var data = this.data;
 
         if (value instanceof Array) {
 
-            for (var id in value) {
-                if (value[id] in data !== true) {
+            for (var _, key in value) {
+                if (key in data !== true) {
                     return false;
                 }
             }
@@ -157,9 +143,9 @@ module Set = proto {
     },
 
     /**
-     * check if set lacks single value, all values of array or set
+     * check if set lacks single value or all values of array or set
      *
-     * @param value
+     * @param mixed value array, set or string
      * @return boolean
      */
     lacks: func(value) {
@@ -167,21 +153,59 @@ module Set = proto {
     },
 
     /**
-     * returns key missing in this set to equal another set or array
+     * check if set has single value or one or more values of array or set
      *
-     * @param value
+     * @param mixed value array, set or string
      * @return boolean
      */
-    missing: func(value) {
+    /*some: func(value) {
+
+        var data = this.data;
+
+        if (value instanceof Array) {
+
+            for (var _, key in value) {
+                if (key in data) {
+                    return true;
+                }
+            }
+
+            return false;
+
+        } else if (value instanceof Set) {
+
+            var other = value.data;
+
+            for (var key in other) {
+                if (key in data) {
+                    return true;
+                }
+            }
+
+            return false;
+
+        } else {
+
+            return (value in data);
+        }
+    },*/
+
+    /**
+     * returns key(s) missing in this set to equal another set or array
+     *
+     * @param mixed value array or set
+     * @return boolean
+     */
+    /*missing: func(value) {
 
         var result = new Set();
         var data = this.data;
 
         if (value instanceof Array) {
 
-            for (var id in value) {
-                if (data[value[id]] !== true) {
-                    result.add(value[id]);
+            for (var _, key in value) {
+                if (data[key] !== true) {
+                    result.add(key);
                 }
             }
 
@@ -198,6 +222,79 @@ module Set = proto {
         } else {
 
             throw new Error('invalid argument');
+        }
+
+        return result;
+    },*/
+
+    /**
+     * returns relative complement of this set with given sets (all elements in this that are not
+     * elements of any given set)
+     *
+     * @param Set, ...sets to intersect
+     * @return Set resulting Set
+     */
+    difference: func(...sets) {
+
+        var result = new Set();
+
+        for (var key in this.data) {
+            var add = true;
+            for (var _, set in sets) {
+                if (key in set.data) {
+                    add = false;
+                    break;
+                }
+            }
+            result.add(key);
+        }
+
+        return result;
+    },
+
+    /**
+     * returns intersection of this and given sets (all elements of this set that are also present
+     * in all given sets)
+     *
+     * @param Set, ...sets to intersect
+     * @return Set resulting Set
+     */
+    intersect: func(...sets) {
+
+        var result = new Set();
+
+        for (var key in this.data) {
+            var add = true;
+            for (var _, set in sets) {
+                if (key in set.data !== true) {
+                    add = false;
+                    break;
+                }
+            }
+            result.add(key);
+        }
+
+        return result;
+    },
+
+    /**
+     * returns union of this and given sets
+     *
+     * @param Set, ...sets to include in union
+     * @return Set resulting Set
+     */
+    union: func(...sets) {
+
+        var result = new Set();
+
+        for (var key in this.data) {
+            result.data[key] = true;
+        }
+
+        for (var _, set in sets) {
+            for (var key in set.data) {
+                result.data[key] = true;
+            }
         }
 
         return result;
@@ -219,7 +316,7 @@ module Set = proto {
      */
     empty: prop {
         get : func() {
-            for (var dummy in this.data) {
+            for (var _ in this.data) {
                 return false;
             }
             return true;
@@ -234,7 +331,7 @@ module Set = proto {
     length: prop {
         get : func() {
             var len = 0;
-            for (var dummy in this.data) {
+            for (var _ in this.data) {
                 len++;
             }
             return len;

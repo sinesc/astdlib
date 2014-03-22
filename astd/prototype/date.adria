@@ -63,14 +63,14 @@ module DateExtensions = proto {
 
     format: func(formatString, localeName = 'enGB') {
 
-        var self = this;
+        var _this = this;
         var locale = dateLocale[localeName];
 
         return formatString.replace(/%(.)/g, func(m, p) {
 
             // call first datemarker function for this part
 
-            var part = self[dateMarkers[p][0]]();
+            var part = _this[dateMarkers[p][0]]();
 
             // check if part requires postprocessing by second datemarker function
 

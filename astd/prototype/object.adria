@@ -35,8 +35,8 @@ module ObjectExtensions = proto {
      *
      * merges properties of the given objects into this one
 
-     * @param overwrite optional. if false, existing properties will no be overwritten
-     * @param ... objects
+     * @param boolean overwrite optional. if false, existing properties will no be overwritten
+     * @param object ...objects
      */
     merge: prop {
         value: func(overwrite) {
