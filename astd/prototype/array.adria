@@ -83,13 +83,15 @@ module ArrayExtensions = proto {
         }
     },
 
+    //!todo only works for strings
     unique: prop {
         value: func(arr) {
-            var hash = {}, result = [];
+            var hash = Object.create(null), result = [];
             for ( var i = 0, l = this.length; i < l; ++i ) {
-                if ( !hash.hasOwnProperty(this[i]) ) {
-                    hash[ this[i] ] = true;
-                    result.push(this[i]);
+                var value = this[i];
+                if (value in hash === false) {
+                    hash[value] = true;
+                    result.push(value);
                 }
             }
             return result;

@@ -109,12 +109,26 @@ module Listenable = proto {
     },
 
     /**
+     * forward call to Listenable event
+     *
+     * @param string eventName
+     * @param ...args additional arguments to pass to event handler before the event arguments
+     * @return func function that when called will execute the given event
+     */
+    forward: func(eventName, ...args) {
+
+        var bindArgs = [ this, eventName ];
+        bindArgs.push.apply(bindArgs, args);
+        return this.execute.bind.apply(this.execute, bindArgs);
+    },
+
+    /**
      * triggers given event and notifies listeners (async)
      *
      * @see execute
      */
-    trigger: func(eventName) {
-        util.defer(this, arguments, this.execute);
+    trigger: func(...args) {
+        util.defer(this, args, this.execute);
     },
 
     /**

@@ -93,6 +93,10 @@ module StringExtensions = proto {
         return (this.substr(0, len) === prefix ? this.substr(len) : this.valueOf());
     },
 
+    addPrefix: func(prefix) {
+        return this.hasPrefix(prefix) ? this.valueOf() : prefix + this.valueOf();
+    },
+
     /**
      * returns whether this string has given postfix
      *
@@ -131,6 +135,10 @@ module StringExtensions = proto {
 
         len = postfix.length;
         return (this.substr(-len) === postfix ? this.substr(0, this.length - len) : this.valueOf());
+    },
+
+    addPostfix: func(postfix) {
+        return this.hasPostfix(postfix) ? this.valueOf() : this.valueOf() + postfix;
     },
 
     /**
