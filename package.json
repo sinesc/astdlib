@@ -1,0 +1,38 @@
+{
+  "name": "astdlib",
+  "version": "0.1.0",
+  "description": "Adria 'Standard' Library",
+  "files": [
+    "astd/",
+    "tests/",
+    "astd.adria",
+    "LICENSE",
+    "README.md"
+  ],
+  "bin": {
+  },
+  "directories": {
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:sinesc/astdlib.git"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+  },
+  "engines": {
+  },
+  "keywords": [
+    "adria",
+  ],
+  "preferGlobal": true,
+  "author": "Dennis Möhlmann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sinesc/astdlib/issues"
+  }
+}

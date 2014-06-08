@@ -1,4 +1,6 @@
 astdlib
 =======
 
-Adria Standard Library
+Adria "Standard" Library
+
+not much there yet, required by adria

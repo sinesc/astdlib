@@ -265,13 +265,17 @@ module Set = proto {
 
         for (var key in this.data) {
             var add = true;
+
             for (var _, set in sets) {
                 if (key in set.data !== true) {
                     add = false;
                     break;
                 }
             }
-            result.add(key);
+
+            if (add) {
+                result.add(key);
+            }
         }
 
         return result;
