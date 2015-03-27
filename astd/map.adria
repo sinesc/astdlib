@@ -104,7 +104,7 @@ module Map = proto {
     inc: func(scalar key, finite value = 1) {
 
         if (key in this.data) {
-            this.data[key]++;
+            this.data[key] += value;
         } else {
             this.data[key] = value;
         }
