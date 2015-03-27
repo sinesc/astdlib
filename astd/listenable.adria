@@ -141,7 +141,7 @@ module Listenable = proto {
      */
     on: func(eventName, [ [ params = [] ], context = this ], callback) {
 
-        if (expand.call(this, this.on, arguments, 0)) {
+        if (expand.call(this, this.on, 0, eventName, params, context, callback)) {
             return;
         }
 
@@ -161,7 +161,7 @@ module Listenable = proto {
      */
     once: func(eventName, [ [ params = [] ], context = this ], callback) {
 
-        if (expand.call(this, this.once, arguments, 0)) {
+        if (expand.call(this, this.once, 0, eventName, params, context, callback)) {
             return;
         }
 
@@ -183,7 +183,7 @@ module Listenable = proto {
      */
     off: func(eventName, context, callback) {
 
-        if (expand.call(this, this.off, arguments, 0)) {
+        if (expand.call(this, this.off, 0, eventName, context, callback)) {
             return;
         }
 
@@ -245,17 +245,16 @@ export Listener = proto {
  * expands given function argument from array to multiple calls per array item
  *
  * @param func fn function to expand
- * @param arguments args original function arguments
- * @param int argId id of argument to expand
+ * @param finite expansionArgId id of argument to expand if array
+ * @param ...args arguments to apply to each expanded call
  */
-var expand = func(fn, args, argId) {
+var expand = func(func fn, finite expansionArgId, ...args) {
 
-    var expansionArg = args[argId];
+    var expansionArgs = args[expansionArgId];
 
-    if (expansionArg instanceof Array) {
-        args = Array::slice.call(args);
-        for (var _, value in expansionArg) {
-            args[argId] = value;
+    if (expansionArgs instanceof Array) {
+        for (var i = 0, len = expansionArgs.length; i < len; i++) {
+            args[expansionArgId] = expansionArgs[i];
             fn.apply(this, args);
         }
         return true;
