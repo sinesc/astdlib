@@ -31,8 +31,6 @@ export extend = func() {
 module ArrayExtensions = proto {
 
     /**
-     * Array.first
-     *
      * returns the first array element id or null
      */
     first: prop {
@@ -45,8 +43,6 @@ module ArrayExtensions = proto {
     },
 
     /**
-     * Array.insert
-     *
      * inserts a value at the end of the array and returns its index
      */
     insert: prop {
@@ -56,8 +52,6 @@ module ArrayExtensions = proto {
     },
 
     /**
-     * Array.remove
-     *
      * removes an element from the array, shifts the last element into
      * the position of the removed element and reduces array length by one
      *
@@ -80,6 +74,15 @@ module ArrayExtensions = proto {
 
             this[id] = this[this.length -1];
             return --this.length;
+        }
+    },
+
+    /**
+     * returns a random array element
+     */
+    random: prop {
+        value: func() {
+            return this[Math.floor(Math.random() * this.length)];
         }
     },
 
