@@ -35,18 +35,15 @@ module ObjectExtensions = proto {
      *
      * merges properties of the given objects into this one
 
-     * @param boolean overwrite optional. if false, existing properties will no be overwritten
+     * @param boolean overwrite. if false, existing properties will no be overwritten
      * @param object ...objects
      */
     merge: prop {
-        value: func(overwrite) {
+        value: func(boolean overwrite, ...args) {
 
-            var noFlag = overwrite instanceof Object;
-            var args = Array::slice.call(arguments, noFlag ? 0 : 1);
+            for (var i = 0, len = args.length; i < len; ++i) {
 
-            overwrite = (noFlag ? true : overwrite);
-
-            for (var argId, argValue in args) {
+                var argValue = args[i];
                 var props = Object.getOwnPropertyNames(argValue);
 
                 if (overwrite === false) {
