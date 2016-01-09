@@ -66,7 +66,7 @@ module Listenable = proto {
      */
     execute: func(eventName, ...args) {
 
-        if (this._listener === null || (this._listener[eventName] === undefined && this._listener['_'] === undefined)) {
+        if (this._listener == null || (this._listener[eventName] == undefined && this._listener['_'] == undefined)) {
             return;
         }
 
@@ -74,7 +74,7 @@ module Listenable = proto {
 
         var eventListener = this._listener[eventName];
 
-        if (eventListener !== undefined) {
+        if (eventListener != undefined) {
 
             var id = eventListener.length;
 
@@ -92,7 +92,7 @@ module Listenable = proto {
 
         eventListener = this._listener['_'];
 
-        if (eventListener !== undefined) {
+        if (eventListener != undefined) {
 
             var methodName = 'on' + eventName.charAt(0).toUpperCase() + eventName.slice(1);
             var method;
@@ -101,7 +101,7 @@ module Listenable = proto {
 
                 method = listener.context[methodName];
 
-                if (typeof method === 'function') {
+                if (typeof method == 'function') {
                     method.apply(listener.context, args);
                 }
             }
@@ -145,10 +145,10 @@ module Listenable = proto {
             return;
         }
 
-        assert(typeof eventName === 'string');
+        assert(typeof eventName == 'string');
         assert(params instanceof Array);
-        assert(context === null || context instanceof Object);
-        assert(typeof callback === 'function');
+        assert(context == null || context instanceof Object);
+        assert(typeof callback == 'function');
 
         initListener.call(this, eventName);
         this._listener[eventName].push(new Listener(params, context, callback, false));
@@ -165,10 +165,10 @@ module Listenable = proto {
             return;
         }
 
-        assert(typeof eventName === 'string');
+        assert(typeof eventName == 'string');
         assert(params instanceof Array);
-        assert(context === null || context instanceof Object);
-        assert(typeof callback === 'function');
+        assert(context == null || context instanceof Object);
+        assert(typeof callback == 'function');
 
         initListener.call(this, eventName);
         this._listener[eventName].push(new Listener(params, context, callback, true));
@@ -189,19 +189,19 @@ module Listenable = proto {
 
         // check if anything is registered at all
 
-        assert(typeof eventName === 'string');
+        assert(typeof eventName == 'string');
 
-        if (this._listener === null || this._listener[eventName] === undefined) {
+        if (this._listener == null || this._listener[eventName] == undefined) {
             return false;
         }
 
-        if (callback === undefined) {
+        if (callback == undefined) {
 
             if (context instanceof Listener) {
                 return offListener(this._listener[eventName], context);
-            } else if (typeof context === 'function') {
+            } else if (typeof context == 'function') {
                 return offCallback(this._listener[eventName], this, context);
-            } else if (context === undefined) {
+            } else if (context == undefined) {
                 delete this._listener[eventName];
                 return true;
             } else  {
@@ -231,8 +231,8 @@ export Listener = proto {
 
         assert(params instanceof Array);
         assert(context instanceof Object);
-        assert(typeof callback === 'function' || callback === null);
-        assert(once === true || once === false);
+        assert(typeof callback == 'function' || callback == null);
+        assert(once == true || once == false);
 
         this.params = params;
         this.context = context;
@@ -270,11 +270,11 @@ var expand = func(func fn, finite expansionArgId, ...args) {
  */
 var initListener = func(eventName) {
 
-    if (this._listener === null) {
+    if (this._listener == null) {
         this._listener = { };
     }
 
-    if (this._listener[eventName] === undefined) {
+    if (this._listener[eventName] == undefined) {
         this._listener[eventName] = [ ];
     }
 };
@@ -293,7 +293,7 @@ var offListener = func(eventListener, listener) {
     var id = eventListener.length;
 
     while (id--) {
-        if (eventListener[id] === listener) {
+        if (eventListener[id] == listener) {
             ArrayExtensions::remove.call(eventListener, id);
             return true;
         }
@@ -313,12 +313,12 @@ var offListener = func(eventListener, listener) {
 var offCallback = func(eventListener, context, callback) {
 
     assert(context instanceof Object);
-    assert(typeof callback === 'function' || callback === null);
+    assert(typeof callback == 'function' || callback == null);
 
     var id = eventListener.length;
 
     while (id--) {
-        if (eventListener[id].context === context && eventListener[id].callback === callback) {
+        if (eventListener[id].context == context && eventListener[id].callback == callback) {
             ArrayExtensions::remove.call(eventListener, id);
             return true;
         }

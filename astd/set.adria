@@ -36,7 +36,7 @@ module Set = proto {
 
         this.data = Object.create(null);
 
-        if (value !== undefined) {
+        if (value != undefined) {
             this.add(value);
         }
     },
@@ -48,7 +48,7 @@ module Set = proto {
      */
     add: func(value) {
 
-        assert(value instanceof Array || value instanceof Set || typeof value === 'string' || typeof value === 'number');
+        assert(value instanceof Array || value instanceof Set || typeof value == 'string' || typeof value == 'number');
 
         var data = this.data;
 
@@ -79,7 +79,7 @@ module Set = proto {
      */
     remove: func(value) {
 
-        assert(value instanceof Array || value instanceof Set || typeof value === 'string' || typeof value === 'number');
+        assert(value instanceof Array || value instanceof Set || typeof value == 'string' || typeof value == 'number');
 
         var data = this.data;
 
@@ -110,14 +110,14 @@ module Set = proto {
      */
     has: func(value) {
 
-        assert(value instanceof Array || value instanceof Set || typeof value === 'string' || typeof value === 'number');
+        assert(value instanceof Array || value instanceof Set || typeof value == 'string' || typeof value == 'number');
 
         var data = this.data;
 
         if (value instanceof Array) {
 
             for (var _, key in value) {
-                if (key in data !== true) {
+                if (key in data != true) {
                     return false;
                 }
             }
@@ -129,7 +129,7 @@ module Set = proto {
             var other = value.data;
 
             for (var key in other) {
-                if (key in data !== true) {
+                if (key in data != true) {
                     return false;
                 }
             }
@@ -149,7 +149,7 @@ module Set = proto {
      * @return boolean
      */
     lacks: func(value) {
-        return this.has(value) === false;
+        return this.has(value) == false;
     },
 
     /**
@@ -204,7 +204,7 @@ module Set = proto {
         if (value instanceof Array) {
 
             for (var _, key in value) {
-                if (data[key] !== true) {
+                if (data[key] != true) {
                     result.add(key);
                 }
             }
@@ -214,7 +214,7 @@ module Set = proto {
             var other = value.data;
 
             for (var key in other) {
-                if (data[key] !== true) {
+                if (data[key] != true) {
                     result.add(key);
                 }
             }
@@ -267,7 +267,7 @@ module Set = proto {
             var add = true;
 
             for (var _, set in sets) {
-                if (key in set.data !== true) {
+                if (key in set.data != true) {
                     add = false;
                     break;
                 }

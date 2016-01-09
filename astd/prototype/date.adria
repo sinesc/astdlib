@@ -74,7 +74,7 @@ module DateExtensions = proto {
 
             // check if part requires postprocessing by second datemarker function
 
-            if (typeof dateMarkers[p][1] === 'function') {
+            if (typeof dateMarkers[p][1] == 'function') {
                 part = dateMarkers[p][1](part, locale);
             }
 

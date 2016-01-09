@@ -24,7 +24,7 @@
 
 export extend = func() {
     for (var protoName in prototype) {
-        if (protoName !== 'extend') {
+        if (protoName != 'extend') {
             prototype[protoName].extend();
         }
     }

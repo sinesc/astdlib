@@ -69,7 +69,7 @@ module ArrayExtensions = proto {
      */
     remove: prop {
         value: func(id) {
-            assert(typeof id === 'number');
+            assert(typeof id == 'number');
             assert(id < this.length);
 
             this[id] = this[this.length -1];
@@ -92,7 +92,7 @@ module ArrayExtensions = proto {
             var hash = Object.create(null), result = [];
             for ( var i = 0, l = this.length; i < l; ++i ) {
                 var value = this[i];
-                if (value in hash === false) {
+                if (value in hash == false) {
                     hash[value] = true;
                     result.push(value);
                 }

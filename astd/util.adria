@@ -34,7 +34,7 @@
     var asap;
     import process;
 
-    if (typeof process === 'object' && typeof process.nextTick === 'function') {
+    if (typeof process == 'object' && typeof process.nextTick == 'function') {
         asap = func(context, params, callback) {
             process.nextTick(func() {
                 callback.apply(context, params);

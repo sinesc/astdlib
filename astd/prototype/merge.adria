@@ -27,7 +27,7 @@ module merge = func(from, to) {
     var props = Object.getOwnPropertyNames(from);
 
     for (var propId, propName in props) {
-        if (to.hasOwnProperty(propName) === false && propName !== 'extend') {
+        if (to.hasOwnProperty(propName) == false && propName != 'extend') {
             Object.defineProperty(to, propName, Object.getOwnPropertyDescriptor(from, propName));
         }
     }

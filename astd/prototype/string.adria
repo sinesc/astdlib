@@ -61,7 +61,7 @@ module StringExtensions = proto {
      */
     hasPrefix: func(prefix) {
 
-        return (this.substr(0, prefix.length) === prefix);
+        return (this.substr(0, prefix.length) == prefix);
     },
 
     /**
@@ -81,7 +81,7 @@ module StringExtensions = proto {
 
                 len = prefix[i].length;
 
-                if (this.substr(0, len) === prefix[i]) {
+                if (this.substr(0, len) == prefix[i]) {
                     return this.substr(len);
                 }
             }
@@ -90,7 +90,7 @@ module StringExtensions = proto {
         }
 
         len = prefix.length;
-        return (this.substr(0, len) === prefix ? this.substr(len) : this.valueOf());
+        return (this.substr(0, len) == prefix ? this.substr(len) : this.valueOf());
     },
 
     addPrefix: func(prefix) {
@@ -105,7 +105,7 @@ module StringExtensions = proto {
      */
     hasPostfix: func(postfix) {
 
-        return (this.substr(-postfix.length) === postfix);
+        return (this.substr(-postfix.length) == postfix);
     },
 
     /**
@@ -125,7 +125,7 @@ module StringExtensions = proto {
 
                 len = postfix[i].length;
 
-                if (this.substr(-len) === postfix[i]) {
+                if (this.substr(-len) == postfix[i]) {
                     return this.substr(0, this.length - len);
                 }
             }
@@ -134,7 +134,7 @@ module StringExtensions = proto {
         }
 
         len = postfix.length;
-        return (this.substr(-len) === postfix ? this.substr(0, this.length - len) : this.valueOf());
+        return (this.substr(-len) == postfix ? this.substr(0, this.length - len) : this.valueOf());
     },
 
     addPostfix: func(postfix) {
@@ -149,7 +149,7 @@ module StringExtensions = proto {
 
         // if first argument is array or object, use only that
 
-        if (args.length === 1 && args[0] instanceof Object) {
+        if (args.length == 1 && args[0] instanceof Object) {
             args = args[0];
         }
 
@@ -157,32 +157,32 @@ module StringExtensions = proto {
 
             // double $$ means to output a $ instead of a format-string
 
-            if (prefix === '$') {
-                return '$' + matchname + (optmatch !== undefined ? optmatch : '') + (separator !== undefined ? separator : '');
+            if (prefix == '$') {
+                return '$' + matchname + (optmatch != undefined ? optmatch : '') + (separator != undefined ? separator : '');
             }
 
             // formatting options
 
             var formatted = args[matchname];
 
-            if (options !== undefined) {
+            if (options != undefined) {
 
-                if (options.slice(-1) === '.') {
+                if (options.slice(-1) == '.') {
                     options = options.slice(0, -1);
                 }
 
-                if (options === 'currency') {
+                if (options == 'currency') {
                     formatted = Math.floor(formatted * 100) / 100;
                 }
 
-                if (options.substr(0, 4) === 'pad:') {
+                if (options.substr(0, 4) == 'pad:') {
                     formatted = String::padLeft.call(''+formatted, options.substr(4), ' ');
                 }
             }
 
             // replace and return
 
-            return (args[matchname] !== undefined ? prefix + formatted : str);
+            return (args[matchname] != undefined ? prefix + formatted : str);
         });
     },
 
@@ -229,7 +229,7 @@ module StringExtensions = proto {
         var count = 0;
         var index = this.indexOf(search);
 
-        while (index !== -1) {
+        while (index != -1) {
             count++;
             index = this.indexOf(search, index + 1);
         }
@@ -269,9 +269,9 @@ module StringExtensions = proto {
      */
     jsify: func(quoteType) {
 
-        if (quoteType === "'") {
+        if (quoteType == "'") {
             return this.replace(/([\\'])/g, "\\$1").replace(/\r?\n/g, '\\n\\\n').replace(/\0/g, "\\0");
-        } else if (quoteType === '"') {
+        } else if (quoteType == '"') {
             return this.replace(/([\\"])/g, "\\$1").replace(/\r?\n/g, '\\n\\\n').replace(/\0/g, "\\0");
         } else {
             return this.replace(/([\\"'])/g, "\\$1").replace(/\r?\n/g, '\\n\\\n').replace(/\0/g, "\\0");

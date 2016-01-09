@@ -48,7 +48,7 @@ module NumberExtensions = proto {
      */
     even: prop {
         get: func() {
-            return this % 2 === 0;
+            return this % 2 == 0;
         }
     },
 
@@ -59,7 +59,7 @@ module NumberExtensions = proto {
      */
     odd: prop {
         get: func() {
-            return this % 2 === 1;
+            return this % 2 == 1;
         }
     },
 

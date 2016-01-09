@@ -39,7 +39,7 @@ module Map = proto {
 
         this.data = Object.create(null);
 
-        if (key !== undefined) {
+        if (key != undefined) {
             this.set(key, value);
         }
     },
@@ -78,9 +78,9 @@ module Map = proto {
 
         var data = this.data;
 
-        if (typeof key === 'object') {
+        if (typeof key == 'object') {
 
-            assert(value === undefined);
+            assert(value == undefined);
             var source = (key instanceof Map ? key.data : key);
 
             for (var mapKey, mapValue in source) {
@@ -166,7 +166,7 @@ module Map = proto {
         if (key instanceof Array) {
 
             for (var _, item in key) {
-                if (item in data !== true) {
+                if (item in data != true) {
                     return false;
                 }
             }
@@ -176,7 +176,7 @@ module Map = proto {
         } else if (key instanceof Set) {
 
             for (var item in key.data) {
-                if (item in data !== true) {
+                if (item in data != true) {
                     return false;
                 }
             }
@@ -196,7 +196,7 @@ module Map = proto {
      * @return boolean
      */
     lacks: func(key) {
-        return this.has(key) === false;
+        return this.has(key) == false;
     },
 
     /**
@@ -262,7 +262,7 @@ module Map = proto {
     find: func(searchValue, notFoundResult = undefined) {
 
         for (var key, value in this.data) {
-            if (value === searchValue) {
+            if (value == searchValue) {
                 return key;
             }
         }

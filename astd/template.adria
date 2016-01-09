@@ -50,10 +50,10 @@ module Template = proto {
      */
     assign: func(name, value) {
 
-        if (name instanceof Object && value === undefined) {
+        if (name instanceof Object && value == undefined) {
             this.data.merge(true, name);
         } else {
-            assert(typeof name === 'string');
+            assert(typeof name == 'string');
             this.data[name] = value;
         }
     },
@@ -67,7 +67,7 @@ module Template = proto {
      */
     registerPreprocessor: func(name, context, handler) {
 
-        if (typeof context === 'function' && handler === undefined) {
+        if (typeof context == 'function' && handler == undefined) {
             handler = context;
             context = this;
         }
@@ -111,11 +111,11 @@ module Template = proto {
 
             // handle string, statement, expression and comment
 
-            if (match[1] === undefined && match[2] === undefined && match[3] === undefined) {
+            if (match[1] == undefined && match[2] == undefined && match[3] == undefined) {
 
                 jsString += 'this.source += "' + match[0].jsify('"') + '";\n';
 
-            } else if (match[1] !== undefined) {
+            } else if (match[1] != undefined) {
 
                 var preprocessor, statement = match[0].slice(2, -2);
 
@@ -123,17 +123,17 @@ module Template = proto {
                 statement = statement.replace(/^\s*while/, '} while');
                 statement = statement.replace(/^\s*end(if|for|while)/, '}');
 
-                if ((preprocessor = this.checkPreprocessor(statement)) !== null) {
+                if ((preprocessor = this.checkPreprocessor(statement)) != null) {
                     jsString += this.runPreprocessor(preprocessor, statement);
                 } else {
                     jsString += statement + '\n';
                 }
 
-            } else if (match[2] !== undefined) {
+            } else if (match[2] != undefined) {
 
                 jsString += 'this.source += ' + match[0].slice(2, -2) + ';\n';
 
-            } else if (this.debug && match[3] !== undefined) {
+            } else if (this.debug && match[3] != undefined) {
 
                 jsString += 'this.source += "/*' + match[0].slice(2, -2).jsify('"') + '*/";\n';
             }
@@ -152,7 +152,7 @@ module Template = proto {
 
         var nameMatch = statement.match(/^\s*([a-z][a-z0-9_]*)\s*\(/);
 
-        if (nameMatch !== null && this.preprocessors[nameMatch[1]] !== undefined) {
+        if (nameMatch != null && this.preprocessors[nameMatch[1]] != undefined) {
             return nameMatch[1];
         } else {
             return null;

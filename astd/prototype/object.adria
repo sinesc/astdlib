@@ -46,9 +46,9 @@ module ObjectExtensions = proto {
                 var argValue = args[i];
                 var props = Object.getOwnPropertyNames(argValue);
 
-                if (overwrite === false) {
+                if (overwrite == false) {
                     for (var propId, propName in props) {
-                        if (this.hasOwnProperty(propName) === false) {
+                        if (this.hasOwnProperty(propName) == false) {
                             Object.defineProperty(this, propName, Object.getOwnPropertyDescriptor(argValue, propName));
                         }
                     }
