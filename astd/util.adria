@@ -21,7 +21,15 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-export defer = (func defer() {
+
+/**
+ * defer execution to asynchronous callback
+ *
+ * @param context
+ * @param params
+ * @param callback
+ */
+ export defer = (func defer() {
 
     var asap;
     import process;
@@ -40,17 +48,7 @@ export defer = (func defer() {
         };
     }
 
-    return func(context, params, callback) {
-
-        if (params === undefined) {
-            callback = context;
-            context = null;
-            params = [];
-        } else if (callback === undefined) {
-            callback = params;
-            params = [];
-        }
-
+    return func defer([ context = null, [ params = [] ] ], func callback) {
         asap(context, params, callback);
     };
 

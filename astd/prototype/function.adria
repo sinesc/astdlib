@@ -33,37 +33,19 @@ module FunctionExtensions = proto {
     /**
      * invoke a constructor with variable arguments
      */
-    construct: func(argsArray) {
+    construct: prop {
+        value: func(argsArray) {
 
-        // first parameter is ignored, push arguments behind it
+            // first parameter is ignored, push arguments behind it
 
-        var args = [ null ];
-        Array.prototype.push.apply(args, argsArray);
+            var args = [ null ];
+            Array::push.apply(args, argsArray);
 
-        // call bind on this function using arguments null, argsArray[0]... to get constructor with args, then new it
+            // call bind on this function using arguments null, argsArray[0]... to get constructor with args, then new it
 
-        return new (Function.prototype.bind.apply(this, args));
-    },
-
-    /**
-     * copies properties from given constructor's prototype to this constructors prototype, skipping properties
-     * that already exists immediately in the constructors prototype
-     *
-     * @param constructor constructor whose prototype is to be copied
-     */
-    mixin: func(constructor) {
-
-        var thisProto = this.prototype;
-        var otherProto = constructor.prototype;
-        var props = Object.getOwnPropertyNames(otherProto);
-        var propName;
-
-        for (var id in props) {
-            propName = props[id];
-            if (thisProto.hasOwnProperty(propName) === false) {
-                Object.defineProperty(thisProto, propName, Object.getOwnPropertyDescriptor(otherProto, propName));
-            }
-        }
+            return new (Function::bind.apply(this, args));
+        },
+        writable: true,
     },
 
 };

@@ -24,6 +24,15 @@
 module Random = proto {
 
     /**
+     * create new instance
+     *
+     * @param finite seed initial seed
+     */
+    constructor: func(finite seed = Math.random()) {
+        this.seed = seed;
+    },
+
+    /**
      * internal seed state
      */
     _current: 1,
@@ -44,10 +53,19 @@ module Random = proto {
     },
 
     /**
+     * resets the sequence
+     */
+    reset: func() {
+        var tmp = this.seed;
+        this.seed = tmp;
+    },
+
+    /**
      * returns a random float between 0 and 1 (exclusive)
+     * !todo needs actual prng algorithm. current implementation prefers 0/1
      */
     get: func() {
-        var value = Math.sin(this._current++) * 10000;
+        var value = Math.sin(this._current++) * 100000;
         return value - Math.floor(value);
     },
 
@@ -55,16 +73,120 @@ module Random = proto {
      * returns a random float between min and max (exclusive)
      */
     float: func(finite min, finite max) {
-        var value = Math.sin(this._current++) * 10000;
-        return (value - Math.floor(value)) * (max - min) + min;
+        return this.get() * (max - min) + min;
     },
 
     /**
      * returns a random integer between min and max (exclusive)
      */
     int: func(finite min, finite max) {
-        var value = Math.sin(this._current++) * 10000;
-        return Math.floor((value - Math.floor(value)) * (max - min) + min);
+        return Math.floor(this.get() * (max - min) + min);
     },
 
+    /**
+     * random integer up to range -1 with a linear preference for high numbers
+     *
+     * @param finite range
+     * @return finite result
+     */
+    floatLinearMax: func(finite range) {
+        return Math.sqrt(this.get() * range * range);
+    },
+
+    /**
+     * random integer up to range -1 with a linear preference for low numbers
+     *
+     * @param finite range
+     * @return finite result
+     */
+    floatLinearMin: func(finite range) {
+        return range - Math.sqrt(this.get() * range * range);
+    },
+
+    /**
+     * random integer up to range -1 with a linear preference for high numbers
+     *
+     * @param finite range
+     * @return finite result
+     */
+    intLinearMax: func(finite range) {
+        return Math.floor(Math.sqrt(this.get() * range * range));
+    },
+
+    /**
+     * random integer up to range -1 with a linear preference for low numbers
+     *
+     * @param finite range
+     * @return finite result
+     */
+    intLinearMin: func(finite range) {
+        return Math.floor(range - Math.sqrt(this.get() * range * range));
+    },
+
+    /**
+     * random integer up to range -1 with a power of n preference for high numbers
+     *
+     * @param finite range
+     * @param finite power
+     * @return finite result
+     */
+    floatPowerMax: func(finite range, finite power) {
+        return Math.pow(this.get() * Math.pow(range, power), 1 / power);
+    },
+
+    /**
+     * random integer up to range -1 with a power of n preference for low numbers
+     *
+     * @param finite range
+     * @param finite power
+     * @return finite result
+     */
+    floatPowerMin: func(finite range, finite power) {
+        return range - Math.pow(this.get() * Math.pow(range, power), 1 / power);
+    },
+
+    /**
+     * random integer up to range -1 with a power of n preference for high numbers
+     *
+     * @param finite range
+     * @param finite power
+     * @return finite result
+     */
+    intPowerMax: func(finite range, finite power) {
+        return Math.floor(Math.pow(this.get() * Math.pow(range, power), 1 / power));
+    },
+
+    /**
+     * random integer up to range -1 with a power of n preference for low numbers
+     *
+     * @param finite range
+     * @param finite power
+     * @return finite result
+     */
+    intPowerMin: func(finite range, finite power) {
+        return Math.floor(range - Math.pow(this.get() * Math.pow(range, power), 1 / power));
+    },
+
+    /**
+     * picks a random item from given item table
+     *
+     * @param itemTable object { itemKey.1 : itemChance.1, itemKey.2 : itemChance.2, ... } with sum(itemChance) < = 1
+     * @return itemKey or null if total chance < 1 and algorithm did not select an item
+     */
+    pick: func(object itemTable) {
+
+        var chance = this.get();
+        var total = 0;
+
+        for (var id in itemTable) {
+
+            total += itemTable[id];
+
+            if (chance >= (total- itemTable[id]) && chance <= total) {
+                return id;
+            }
+        }
+
+        return null;
+    },
 };

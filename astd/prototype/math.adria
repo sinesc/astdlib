@@ -30,49 +30,6 @@ export extend = func() {
 module MathExtensions = { };
 
 /**
- * picks a random item from given item table
- *
- * @param itemTable object { itemKey.1 : itemChance.1, itemKey.2 : itemChance.2, ... } with sum(itemChance) < = 1
- * @return itemKey or null if total chance < 1 and algorithm did not select an item
- */
-export pick = func(itemTable) {
-
-    var chance = Math.random();
-    var total = 0;
-
-    for (var id in itemTable) {
-
-        total += itemTable[id];
-
-        if (chance >= (total- itemTable[id]) && chance <= total) {
-            return id;
-        }
-    }
-
-    return null;
-};
-
-/**
- * random integer up to range -1 with a quadratic preference for high numbers
- *
- * @param range
- * @return result
- */
-export tailDist = func(range) {
-    return Math.floor(Math.sqrt(Math.random() * range * range));
-};
-
-/**
- * random integer up to range -1 with a quadratic preference for low numbers
- *
- * @param range
- * @return result
- */
-export headDist = func(range) {
-    return range -1 - Math.floor(Math.sqrt(Math.random() * range * range));
-};
-
-/**
  * returns a random float value
  *
  * @param min minimum value to return
